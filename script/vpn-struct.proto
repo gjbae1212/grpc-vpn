@@ -1,0 +1,42 @@
+syntax = "proto3";
+package vpn;
+
+message IPPacket {
+    ErrorCode error_code = 1; // error code
+
+    bytes raw = 2; // raw packet
+    bytes destination_ip = 3; // ipv4 destination
+    bytes ip_protocol = 4; // ip protocol (http://en.wikipedia.org/wiki/List_of_IP_protocol_numbers)
+}
+
+message AuthRequest {
+    message GoogleOpenID {}
+    message AwsIam {}
+
+    AuthType auth_type = 1; // auth type
+    GoogleOpenID google_open_id = 2; // support google openid connect
+    AwsIam aws_iam = 3;  // support aws iam
+}
+
+message AuthResponse {
+    ErrorCode error_code = 1; // error code
+
+    string jwt = 2; // jwt
+    bytes assigned_ip =  3; // assigned ip
+    bytes gateway = 4; // gateway
+    bytes subnet_ip = 5; // subnet ip
+    bytes subnet_mask =6; // subnet mask
+}
+
+enum AuthType {
+    AT_NONE = 0; // unknown
+    AT_GOOGLE_OPEN_ID = 1; // google open id
+    AT_AWS_IAM = 2; // aws iam
+}
+
+enum ErrorCode {
+    EC_UNKNOWN = 0;
+    EC_SUCCESS = 1;
+    EC_INVALID_AUTHORIZATION = 2;
+    EC_EXPIRED_JWT = 3;
+}

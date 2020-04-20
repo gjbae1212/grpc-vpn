@@ -1,0 +1,12 @@
+syntax = "proto3";
+package vpn;
+
+import "vpn-struct.proto";
+
+service VPN {
+    // authentication
+    rpc Auth(AuthRequest) returns (AuthResponse) {}
+
+    // exchange packets
+    rpc Exchange(stream IPPacket) returns(stream IPPacket) {}
+}
