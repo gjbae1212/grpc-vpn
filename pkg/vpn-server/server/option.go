@@ -10,7 +10,6 @@ type Option interface {
 }
 
 type config struct {
-	logPath                string
 	vpnSubNet              string
 	vpnJwtSalt             string
 	grpcPort               string
@@ -25,13 +24,6 @@ type config struct {
 type OptionFunc func(c *config)
 
 func (o OptionFunc) apply(c *config) { o(c) }
-
-// WithLogPath returns OptionFunc for inserting logPath.
-func WithLogPath(path string) OptionFunc {
-	return func(c *config) {
-		c.logPath = path
-	}
-}
 
 // WithVpnSubNet returns OptionFunc for inserting VPN SUBNET.
 func WithVpnSubNet(vpnSubNet string) OptionFunc {

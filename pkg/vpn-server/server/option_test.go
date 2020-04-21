@@ -10,27 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWithLogPath(t *testing.T) {
-	assert := assert.New(t)
-
-	tests := map[string]struct {
-		input  string
-		output string
-	}{
-		"success": {
-			input:  "allan",
-			output: "allan",
-		},
-	}
-
-	for _, t := range tests {
-		c := &config{}
-		f := WithLogPath(t.input)
-		f(c)
-		assert.Equal(t.output, c.logPath)
-	}
-}
-
 func TestWithVpnSubNet(t *testing.T) {
 	assert := assert.New(t)
 
