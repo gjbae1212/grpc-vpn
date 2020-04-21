@@ -2,11 +2,22 @@ syntax = "proto3";
 package vpn;
 
 message IPPacket {
-    ErrorCode error_code = 1; // error code
+    message Raw {
+        bytes raw = 1; // raw packet
+    }
 
-    bytes raw = 2; // raw packet
-    bytes destination_ip = 3; // ipv4 destination
-    bytes ip_protocol = 4; // ip protocol (http://en.wikipedia.org/wiki/List_of_IP_protocol_numbers)
+    message Vpn {
+        bytes vpn_assigned_ip =  1; // vpn  assigned ip
+        bytes vpn_gateway = 2; // vpn gateway
+        bytes vpn_subnet_ip = 3; // vpn subnet ip
+        bytes vpn_subnet_mask = 4; // vpn subnet mask
+    }
+
+    ErrorCode error_code = 1; // error code
+    IPPacketType packet_type = 2; // packet type
+
+    Raw packet1 = 10; // raw packet
+    Vpn packet2 = 11; // vpn packet
 }
 
 message AuthRequest {
@@ -22,10 +33,6 @@ message AuthResponse {
     ErrorCode error_code = 1; // error code
 
     string jwt = 2; // jwt
-    bytes assigned_ip =  3; // assigned ip
-    bytes gateway = 4; // gateway
-    bytes subnet_ip = 5; // subnet ip
-    bytes subnet_mask =6; // subnet mask
 }
 
 enum AuthType {
@@ -39,4 +46,10 @@ enum ErrorCode {
     EC_SUCCESS = 1;
     EC_INVALID_AUTHORIZATION = 2;
     EC_EXPIRED_JWT = 3;
+}
+
+enum IPPacketType {
+    IPPT_UNKNOWN = 0;
+    IPPT_RAW = 1;
+    IPPT_VPN_ASSIGN = 2;
 }
