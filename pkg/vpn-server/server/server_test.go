@@ -22,7 +22,10 @@ import (
 // mock vpn
 type mockVPN struct{}
 
-func (m *mockVPN) Run() error                                        { return nil }
+func (m *mockVPN) Run() error {
+	time.Sleep(10 * time.Second)
+	return nil
+}
 func (m *mockVPN) Exchange(stream protocol.VPN_ExchangeServer) error { return nil }
 func (m *mockVPN) GetJwtSalt() string                                { return "mock" }
 func (m *mockVPN) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.AuthResponse, error) {

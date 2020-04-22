@@ -5,17 +5,17 @@ package server
 // https://grpc.io/docs/tutorials/basic/go/
 // https://github.com/grpc/grpc-go
 // https://github.com/grpc-ecosystem/go-grpc-middleware
+// https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md
 
 import (
 	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 	"time"
+
+	"github.com/gjbae1212/grpc-vpn/auth"
 
 	"google.golang.org/grpc/peer"
 
@@ -38,10 +38,8 @@ const (
 )
 
 const (
-	// rfc2617 (e.g. Authorization: basic token, Authorization: bearer token)
-	authorizationHeader = "authorization"
-	basic               = "basic"
-	bearer              = "bearer"
+	ipCtxName  = "ip"
+	jwtCtxName = "jwt"
 )
 
 var (
@@ -63,7 +61,6 @@ type vpnServer struct {
 	config *config      // config
 	grpc   *grpc.Server // grpc server
 	vpn    VPN          // vpn
-	exit   chan bool    // server exit signal
 }
 
 // SetDefaultLogger is to set logger for vpn server.
@@ -122,7 +119,6 @@ func NewVpnServer(opts ...Option) (VpnServer, error) {
 	server := &vpnServer{
 		config: cfg,
 		grpc:   grpc.NewServer(allOpts...),
-		exit:   make(chan bool, 1),
 	}
 
 	// make vpn
@@ -130,6 +126,7 @@ func NewVpnServer(opts ...Option) (VpnServer, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "Method: NewVpnServer")
 	}
+	server.vpn = vpn
 
 	// register api
 	protocol.RegisterVPNServer(server.grpc, vpn)
@@ -151,13 +148,11 @@ func (s *vpnServer) Run() error {
 	// run GRPC Server
 	go s.grpc.Serve(listen)
 
-	// run VPN Server
+	// run VPN Server and block
 	if err := s.vpn.Run(); err != nil {
 		return errors.Wrapf(err, "Method: Run")
 	}
 
-	// trap signal
-	trapSignal(s.exit)
 	return nil
 }
 
@@ -169,24 +164,27 @@ func defaultStreamServerInterceptors() grpc.StreamServerInterceptor {
 			}
 		}()
 
-		// check jwt
-		jwt, err := checkJwt(srv, stream)
-		if err != nil {
-			defaultLogger.Error(color.RedString("[err] %s", err.Error()))
-			return err
-		}
-
 		// parse ip
 		var ip net.IP
 		peer, ok := peer.FromContext(stream.Context())
 		if ok {
 			ip = net.ParseIP(peer.Addr.String())
+			if ip == nil {
+				ip = net.ParseIP("127.0.0.1")
+			}
+		}
+
+		// check jwt
+		jwt, err := checkJwt(srv, stream)
+		if err != nil {
+			defaultLogger.Error(color.RedString("[err] %s %s", err.Error(), ip.String()))
+			return err
 		}
 
 		// insert ip and jwt.
 		ctx := stream.Context()
-		ctx = context.WithValue(ctx, "ip", ip)
-		ctx = context.WithValue(ctx, "jwt", jwt)
+		ctx = context.WithValue(ctx, ipCtxName, ip)
+		ctx = context.WithValue(ctx, jwtCtxName, jwt)
 		wrap := &AuthorizedContext{ServerStream: stream, Ctx: ctx}
 
 		if err := handler(srv, wrap); err != nil {
@@ -215,32 +213,17 @@ func defaultUnaryServerInterceptors() grpc.UnaryServerInterceptor {
 		peer, ok := peer.FromContext(ctx)
 		if ok {
 			ip = net.ParseIP(peer.Addr.String())
+			if ip == nil {
+				ip = net.ParseIP("127.0.0.1")
+			}
 		}
-		newCtx := context.WithValue(ctx, "ip", ip)
+		newCtx := context.WithValue(ctx, ipCtxName, ip)
 		result, err := handler(newCtx, req)
 		if err != nil {
-			defaultLogger.Error(color.RedString("[err] %s", err.Error()))
+			defaultLogger.Error(color.RedString("[err] %s %s", err.Error(), ip.String()))
 			return nil, err
 		}
 		return result, nil
-	}
-}
-
-// trap signal
-func trapSignal(exit chan bool) {
-	sig := make(chan os.Signal, 2)
-	done := make(chan bool, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sig
-		done <- true
-	}()
-
-	select {
-	case <-done:
-		defaultLogger.Info(color.YellowString("[trap-signal] signal stopping..."))
-	case <-exit:
-		defaultLogger.Info(color.YellowString("[trap-signal] event stopping..."))
 	}
 }
 
@@ -252,16 +235,16 @@ func checkJwt(srv interface{}, stream grpc.ServerStream) (*jwt.Token, error) {
 		return nil, errors.Wrapf(internal.ErrorUnauthorized, "Method: auth")
 	}
 
-	if len(md[authorizationHeader]) == 0 {
+	if len(md[auth.AuthorizationHeader]) == 0 {
 		return nil, errors.Wrapf(internal.ErrorUnauthorized, "Method: auth")
 	}
 
-	seps := strings.SplitN(md[authorizationHeader][0], " ", 2)
+	seps := strings.SplitN(md[auth.AuthorizationHeader][0], " ", 2)
 	if len(seps) != 2 {
 		return nil, errors.Wrapf(internal.ErrorUnauthorized, "Method: auth")
 	}
 
-	if seps[0] != basic && seps[0] != bearer {
+	if seps[0] != auth.Basic && seps[0] != auth.Bearer {
 		return nil, errors.Wrapf(internal.ErrorUnauthorized, "Method: auth")
 	}
 
