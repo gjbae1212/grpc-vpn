@@ -15,7 +15,7 @@ func DecodeJWT(data string, salt []byte) (*jwt.Token, error) {
 		return nil, errors.Wrapf(ErrorInvalidParams, "Method: DecodeJWT")
 	}
 
-	token, err := jwt.Parse(data, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(data, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if token.Method.Alg() != HS256 {
 			return nil, errors.Wrapf(ErrorInvalidJWT, "Method: DecodeJWT")
 		}

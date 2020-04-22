@@ -3,6 +3,7 @@ package internal
 import (
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
@@ -24,6 +25,15 @@ func NewLogger(filePath string) (*Logger, error) {
 	if filePath == "" {
 		logger.SetOutput(os.Stdout)
 	} else {
+		// make log directory
+		logDir := filepath.Dir(filePath)
+		if _, err := os.Stat(logDir); os.IsNotExist(err) {
+			if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+				return nil, err
+			}
+		}
+
+		// make log file
 		f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			return nil, err

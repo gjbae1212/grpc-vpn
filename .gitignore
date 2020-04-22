@@ -1,3 +1,4 @@
 .idea
 tmp.txt
 *.test
+pkg/vpn-server/vpn-server
