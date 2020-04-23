@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"log"
+	"os"
+	"runtime"
+
 	"github.com/fatih/color"
 	"github.com/gjbae1212/grpc-vpn/pkg/vpn-server/server"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
-	"log"
 )
 
 var (
@@ -19,7 +22,17 @@ var (
 )
 
 func startPreRun() commandRun {
-	return func(cmd *cobra.Command, args []string) {}
+	return func(cmd *cobra.Command, args []string) {
+		if runtime.GOOS == "windows" {
+			log.Printf(color.RedString("Window OS doesn't support."))
+			os.Exit(1)
+		}
+		if os.Getuid() != 0 {
+			log.Printf("%s %s", color.RedString("[REQUIRED][COMMAND]"),
+				color.YellowString("sudo vpn-server run"))
+			os.Exit(1)
+		}
+	}
 }
 
 func startRun() commandRun {

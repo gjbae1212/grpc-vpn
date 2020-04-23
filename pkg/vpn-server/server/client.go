@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	queueSizeForClientIn = 500
+	queueSizeForClientIn = 1000
 )
 
 type client struct {

@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	queueSizeForClientToServer = 500
-	queueSizeForServerToClient = 500
+	queueSizeForClientToServer = 10000
+	queueSizeForServerToClient = 10000
 )
 
 type VPN interface {
@@ -61,6 +61,7 @@ func (v *vpn) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.Au
 	if v.stopping {
 		return nil, errors.Wrapf(internal.ErrorStoppingServer, "Method: Auth")
 	}
+	_ = req
 
 	var user string
 	if ctx.Value(auth.UserCtxName) == nil {
@@ -68,6 +69,7 @@ func (v *vpn) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.Au
 	} else {
 		user = ctx.Value(auth.UserCtxName).(string)
 	}
+	ip := ctx.Value(ipCtxName).(net.IP)
 
 	// make jwt token
 	claims := &jwt.StandardClaims{
@@ -81,6 +83,7 @@ func (v *vpn) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.Au
 	if err != nil {
 		return nil, errors.Wrapf(err, "Method: Auth")
 	}
+	defaultLogger.Info(color.GreenString("[ISSUE] %s origin IP(%s)", user, ip.String()))
 
 	return &protocol.AuthResponse{
 		ErrorCode: protocol.ErrorCode_EC_SUCCESS,
@@ -119,7 +122,7 @@ func (v *vpn) Exchange(stream protocol.VPN_ExchangeServer) error {
 		return errors.Wrapf(err, "Method: Exchange")
 	}
 
-	defaultLogger.Info(color.GreenString("[login] %s (%s, %s)",
+	defaultLogger.Info(color.GreenString("[LOGIN] %s origin IP(%s) vpn IP(%s)",
 		cli.user, cli.originIP.String(), cli.vpnIP.String()))
 
 	// receive packets
@@ -139,6 +142,7 @@ func (v *vpn) Exchange(stream protocol.VPN_ExchangeServer) error {
 
 // Run is to run Tun device for VPN.
 func (v *vpn) Run() error {
+	defer v.Close()
 	// make tun device.
 	tun, err := water.New(water.Config{DeviceType: water.TUN})
 	if err != nil {
@@ -166,6 +170,12 @@ func (v *vpn) Run() error {
 // GetJwtSalt returns JWT Salt.
 func (v *vpn) GetJwtSalt() string {
 	return v.jwtSalt
+}
+
+func (v *vpn) Close() {
+	if err := v.tun.Close(); err != nil {
+		defaultLogger.Error(color.RedString("[err] Close %s", err.Error()))
+	}
 }
 
 // addClient is to add client to map.
@@ -248,6 +258,7 @@ func (v *vpn) loopReadFromTun() {
 
 // loopClientToServer processes packets which should flow out of server.
 func (v *vpn) loopClientToServer() {
+ClientToServerExit:
 	// support only packet1
 	for {
 		select {
@@ -275,11 +286,11 @@ func (v *vpn) loopClientToServer() {
 			size, err := v.tun.Write(packet.Packet1.Raw)
 			if err != nil {
 				defaultLogger.Error(color.RedString("[ERR] Client To Server %s", err.Error()))
-				break
+				break ClientToServerExit
 			}
 
-			if size == len(packet.Packet1.Raw) {
-				defaultLogger.Error(color.RedString("[ERR] Mismatched Sending Packet %s != %s",
+			if size != len(packet.Packet1.Raw) {
+				defaultLogger.Error(color.RedString("[ERR] Mismatched Sending Packet %d != %d",
 					size, len(packet.Packet1.Raw)))
 			}
 		}
@@ -310,7 +321,7 @@ func (v *vpn) loopServerToClient() {
 			if innerVpnClient != nil {
 				innerVpnClient.in <- packet
 			} else {
-				defaultLogger.Error(color.RedString("[ERR] Server To Client Unknown Destination %s", dest.String()))
+				// drop the packets (matched client don't exist)
 			}
 		}
 	}

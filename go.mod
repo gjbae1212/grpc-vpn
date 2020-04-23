@@ -3,6 +3,8 @@ module github.com/gjbae1212/grpc-vpn
 go 1.14
 
 require (
+	github.com/briandowns/spinner v1.10.0
+	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.9.0

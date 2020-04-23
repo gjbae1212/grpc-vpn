@@ -44,7 +44,7 @@ const (
 
 var (
 	defaultOptions = []Option{
-		WithVpnSubNet("10.10.10.10/24"),
+		WithVpnSubNet("10.10.10.1/24"),
 		WithVpnJwtSalt(internal.GenerateRandomString(16)),
 		WithGrpcPort("8080"),
 	}
@@ -168,7 +168,7 @@ func defaultStreamServerInterceptors() grpc.StreamServerInterceptor {
 		var ip net.IP
 		peer, ok := peer.FromContext(stream.Context())
 		if ok {
-			ip = net.ParseIP(peer.Addr.String())
+			ip = net.ParseIP(strings.Split(peer.Addr.String(), ":")[0])
 			if ip == nil {
 				ip = net.ParseIP("127.0.0.1")
 			}
@@ -212,11 +212,12 @@ func defaultUnaryServerInterceptors() grpc.UnaryServerInterceptor {
 		var ip net.IP
 		peer, ok := peer.FromContext(ctx)
 		if ok {
-			ip = net.ParseIP(peer.Addr.String())
+			ip = net.ParseIP(strings.Split(peer.Addr.String(), ":")[0])
 			if ip == nil {
 				ip = net.ParseIP("127.0.0.1")
 			}
 		}
+
 		newCtx := context.WithValue(ctx, ipCtxName, ip)
 		result, err := handler(newCtx, req)
 		if err != nil {

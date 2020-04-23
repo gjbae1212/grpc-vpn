@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/gjbae1212/grpc-vpn/auth"
@@ -48,11 +49,13 @@ func initConfig() {
 	cfgPath := viper.GetString("config")
 
 	if cfgPath == "" {
-		log.Panicln(color.RedString("[ERR] Not Found Config file"))
+		log.Println(color.RedString("[ERR] Not Found Config file"))
+		os.Exit(1)
 	}
 
 	if err := setConfig(cfgPath); err != nil {
-		log.Panicln(color.RedString("[ERR] setConfig %s", err))
+		log.Println(color.RedString("[ERR] setConfig %s", err))
+		os.Exit(1)
 	}
 }
 
