@@ -1,6 +1,9 @@
 package internal
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 const (
 	// TunMtuSize is mtu size in TUN.
@@ -21,4 +24,16 @@ func IncreaseIP(ip net.IP) {
 			break
 		}
 	}
+}
+
+// GetIPByAddr returns ip.
+func GetIPByAddr(addr string) (net.IP, error) {
+	addrs, err := net.LookupIP(addr)
+	if err != nil {
+		return nil, err
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("[ERR] not found ip")
+	}
+	return addrs[seededRand.Int()%len(addrs)], nil
 }

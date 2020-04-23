@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/stretchr/testify/assert"
+	"log"
 	"net"
 	"testing"
 )
@@ -30,5 +31,23 @@ func TestIncreaseIP(t *testing.T) {
 	for _, t := range tests {
 		IncreaseIP(t.input)
 		assert.Equal(t.output, t.input)
+	}
+}
+
+func TestGetIPByAddr(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		input string
+		isErr bool
+	}{
+		"ip":   {input: "8.8.8.8"},
+		"addr": {input: "google.com"},
+	}
+
+	for _, t := range tests {
+		ip, err := GetIPByAddr(t.input)
+		assert.Equal(t.isErr, err != nil)
+		log.Println(ip)
 	}
 }

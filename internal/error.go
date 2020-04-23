@@ -12,4 +12,5 @@ var (
 	ErrorReceiveUnknownPacket = errors.New("[ERR] Receive Unknown Packet")
 	ErrorMismatchVpnIP        = errors.New("[ERR] Mismatch Vpn IP")
 	ErrorStoppingServer       = errors.New("[ERR] Stopping Server")
+	ErrorAlreadyRunning       = errors.New("[ERR] Already Running")
 )
