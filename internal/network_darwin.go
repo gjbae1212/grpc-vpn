@@ -33,6 +33,23 @@ func SetDefaultGateway(gw, tun string) error {
 	return CommandExec("route", args)
 }
 
+// SetPacketForward sets ip packet forward.
+func SetPacketForward(ok bool) error {
+	return nil
+}
+
+// SetPostRoutingMasquerade sets outbound packets masquerade.
+func SetPostRoutingMasquerade(ok bool) error {
+	var sub string
+	if ok {
+		sub = "-t nat -A POSTROUTING -j MASQUERADE"
+	} else {
+		sub = "-t nat -D POSTROUTING 1"
+	}
+	args := strings.Split(sub, " ")
+	return CommandExec("iptables", args)
+}
+
 // SetGoogleDNS sets google dns
 func SetGoogleDNS() error {
 	return CommandExec("networksetup", []string{"-setdnsservers", "Wi-Fi", "8.8.8.8"})

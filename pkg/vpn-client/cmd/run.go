@@ -28,8 +28,8 @@ func startPreRun() commandRun {
 			os.Exit(1)
 		}
 		if os.Getuid() != 0 {
-			log.Printf("%s %s", color.RedString("[REQUIRED][COMMAND]"),
-				color.YellowString("sudo vpn-client run"))
+			log.Printf("%s %s", color.RedString("[RETRY][COMMAND]"),
+				color.CyanString("`sudo vpn-client run`"))
 			os.Exit(1)
 		}
 	}

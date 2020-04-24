@@ -31,6 +31,9 @@ type VPN interface {
 	// Start VPN
 	Run() error
 
+	// stop VPN
+	Close() error
+
 	GetJwtSalt() string
 
 	// GRPC METHODS
@@ -155,6 +158,10 @@ func (v *vpn) Run() error {
 		return errors.Wrapf(err, "Method: %s", "newVPN")
 	}
 
+	// enable network settings
+	internal.SetPacketForward(true)
+	internal.SetPostRoutingMasquerade(true)
+
 	// read packets from TUN
 	go v.loopReadFromTun()
 
@@ -164,6 +171,7 @@ func (v *vpn) Run() error {
 
 	// trap signal(block)
 	v.trapSignal()
+
 	return nil
 }
 
@@ -172,10 +180,14 @@ func (v *vpn) GetJwtSalt() string {
 	return v.jwtSalt
 }
 
-func (v *vpn) Close() {
+func (v *vpn) Close() error {
 	if err := v.tun.Close(); err != nil {
 		defaultLogger.Error(color.RedString("[err] Close %s", err.Error()))
 	}
+	// disable network settings
+	internal.SetPacketForward(false)
+	internal.SetPostRoutingMasquerade(false)
+	return nil
 }
 
 // addClient is to add client to map.

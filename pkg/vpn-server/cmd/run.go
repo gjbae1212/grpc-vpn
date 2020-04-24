@@ -23,13 +23,14 @@ var (
 
 func startPreRun() commandRun {
 	return func(cmd *cobra.Command, args []string) {
-		if runtime.GOOS == "windows" {
-			log.Printf(color.RedString("Window OS doesn't support."))
+		if runtime.GOOS != "linux" {
+			log.Printf(color.RedString("`vpn-server` is only to support LINUX."))
 			os.Exit(1)
 		}
+
 		if os.Getuid() != 0 {
-			log.Printf("%s %s", color.RedString("[REQUIRED][COMMAND]"),
-				color.YellowString("sudo vpn-server run"))
+			log.Printf("%s %s", color.RedString("[RETRY][COMMAND]"),
+				color.CyanString("`sudo vpn-server run`"))
 			os.Exit(1)
 		}
 	}
