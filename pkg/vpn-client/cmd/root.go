@@ -105,9 +105,9 @@ func setConfig(cfgPath string) error {
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "access_key":
-							defaultConfig.Auth.AwsIAM.AccessKey = internal.InterfaceToString(vv)
+							defaultConfig.Auth.AwsIAM.ClientAccessKey = internal.InterfaceToString(vv)
 						case "secret_access_key":
-							defaultConfig.Auth.AwsIAM.SecretAccessKey = internal.InterfaceToString(vv)
+							defaultConfig.Auth.AwsIAM.ClientSecretAccessKey = internal.InterfaceToString(vv)
 						default:
 							return fmt.Errorf("[ERR] unknown config %s", kk)
 						}

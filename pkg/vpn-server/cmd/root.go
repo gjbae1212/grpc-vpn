@@ -112,7 +112,6 @@ func setConfig(cfgPath string) error {
 								defaultConfig.Auth.GoogleOpenId.AllowEmails = append(defaultConfig.Auth.GoogleOpenId.AllowEmails,
 									vvv.(string))
 							}
-							defaultConfig.Auth.GoogleOpenId.HD = internal.InterfaceToString(vv)
 						default:
 							return fmt.Errorf("[ERR] unknown config %s", kk)
 						}
@@ -121,10 +120,13 @@ func setConfig(cfgPath string) error {
 					defaultConfig.Auth.AwsIAM = &auth.AwsIamConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
-						case "access_key":
-							defaultConfig.Auth.AwsIAM.AccessKey = internal.InterfaceToString(vv)
-						case "secret_access_key":
-							defaultConfig.Auth.AwsIAM.SecretAccessKey = internal.InterfaceToString(vv)
+						case "account_id":
+							defaultConfig.Auth.AwsIAM.ServerAccountId = internal.InterfaceToString(vv)
+						case "allow_users":
+							for _, vvv := range vv.([]interface{}) {
+								defaultConfig.Auth.AwsIAM.ServerAllowUsers = append(defaultConfig.Auth.AwsIAM.ServerAllowUsers,
+									vvv.(string))
+							}
 						default:
 							return fmt.Errorf("[ERR] unknown config %s", kk)
 						}

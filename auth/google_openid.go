@@ -33,7 +33,7 @@ type GoogleOpenIDConfig struct {
 	ClientSecret string // google secret
 
 	HD          string   // gsuite domain (only vpn-server)
-	AllowEmails []string //  allow emails (only vpn-server)
+	AllowEmails []string // allow emails (only vpn-server)
 }
 
 // unaryServerInterceptor returns new unary server interceptor that checks an authorization with google openID.

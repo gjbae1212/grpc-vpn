@@ -41,7 +41,7 @@ func (c *Config) ServerAuthForGoogleOpenID() (grpc.UnaryServerInterceptor, bool)
 
 // ServerAuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
 func (c *Config) ServerAuthForAwsIAM() (grpc.UnaryServerInterceptor, bool) {
-	if c.AwsIAM == nil || c.AwsIAM.AccessKey == "" || c.AwsIAM.SecretAccessKey == "" {
+	if c.AwsIAM == nil || c.AwsIAM.ServerAccountId == "" {
 		return nil, false
 	}
 	return c.AwsIAM.unaryServerInterceptor(), true
@@ -74,10 +74,9 @@ func (c *Config) ClientAuthForGoogleOpenID() (ClientAuthMethod, bool) {
 
 // ClientAuthForAwsIAM is returns Auth Method for AWS IAM.
 func (c *Config) ClientAuthForAwsIAM() (ClientAuthMethod, bool) {
-	if c.AwsIAM == nil || c.AwsIAM.AccessKey == "" || c.AwsIAM.SecretAccessKey == "" {
+	if c.AwsIAM == nil || c.AwsIAM.ClientAccessKey == "" || c.AwsIAM.ClientSecretAccessKey == "" {
 		return nil, false
 	}
-
 	return c.AwsIAM.clientAuthMethod(), true
 }
 

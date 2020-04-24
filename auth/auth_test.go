@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig_ServerAuthForGoogleOpenID(t *testing.T) {
@@ -47,8 +48,7 @@ func TestConfig_ServerAuthForAwsIAM(t *testing.T) {
 		"true": {
 			cfg: &Config{
 				AwsIAM: &AwsIamConfig{
-					AccessKey:       "allan",
-					SecretAccessKey: "allan",
+					ServerAccountId: "allan",
 				},
 			},
 			ok: true,
@@ -94,8 +94,8 @@ func TestConfig_ClientAuthForAwsIAM(t *testing.T) {
 		"true": {
 			cfg: &Config{
 				AwsIAM: &AwsIamConfig{
-					AccessKey:       "allan",
-					SecretAccessKey: "allan",
+					ClientAccessKey:       "allan",
+					ClientSecretAccessKey: "allan",
 				},
 			},
 			ok: true,
