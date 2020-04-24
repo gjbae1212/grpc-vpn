@@ -99,8 +99,10 @@ func (c *GoogleOpenIDConfig) unaryServerInterceptor() grpc.UnaryServerIntercepto
 
 		// check gsuite domain(matched)
 		// if hd is empty, don't check hd
-		if hd != "" && hd != claims["hd"].(string) {
-			return nil, internal.ErrorUnauthorized
+		if hd != "" {
+			if claims["hd"] == nil || hd != claims["hd"].(string) {
+				return nil, internal.ErrorUnauthorized
+			}
 		}
 
 		// check email
