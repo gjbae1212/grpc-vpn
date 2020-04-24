@@ -3,6 +3,7 @@ package internal
 import "errors"
 
 var (
+	ErrorUnknown              = errors.New("[ERR] Unknown")
 	ErrorInvalidParams        = errors.New("[ERR] Invalid Params")
 	ErrorUnauthorized         = errors.New("[ERR] Unauthorized")
 	ErrorInvalidJWT           = errors.New("[ERR] Invalid JWT")

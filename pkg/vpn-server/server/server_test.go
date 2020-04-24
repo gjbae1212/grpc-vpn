@@ -26,6 +26,9 @@ func (m *mockVPN) Run() error {
 	time.Sleep(10 * time.Second)
 	return nil
 }
+func (m *mockVPN) Close() error {
+	return nil
+}
 func (m *mockVPN) Exchange(stream protocol.VPN_ExchangeServer) error { return nil }
 func (m *mockVPN) GetJwtSalt() string                                { return "mock" }
 func (m *mockVPN) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.AuthResponse, error) {
@@ -42,7 +45,7 @@ func TestNewVpnServer(t *testing.T) {
 	}{
 		"default": {
 			check: &config{
-				vpnSubNet: "10.10.10.10/24",
+				vpnSubNet: "10.10.10.1/24",
 				grpcPort:  "8080",
 				grpcOptions: []grpc.ServerOption{
 					grpc.MaxRecvMsgSize(maxGRPCMsgSize),

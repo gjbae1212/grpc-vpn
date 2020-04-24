@@ -37,29 +37,7 @@ const (
 )
 
 var (
-	defaultOptions = []Option{
-		WithAuthMethod(func(conn protocol.VPNClient) (jwt string, err error) {
-			// Timeout 30 seconds
-			ctx := context.Background()
-			timeout := 30 * time.Second
-			newctx, cancel := context.WithTimeout(ctx, timeout)
-			defer cancel()
-
-			// call default auth
-			result, err := conn.Auth(newctx, &protocol.AuthRequest{})
-			if err != nil {
-				return "", err
-			}
-
-			// extract JWT
-			switch result.ErrorCode {
-			case protocol.ErrorCode_EC_SUCCESS:
-				return result.Jwt, nil
-			default:
-				return "", internal.ErrorUnauthorized
-			}
-		}),
-	}
+	defaultOptions = []Option{}
 )
 
 var (
@@ -75,7 +53,7 @@ type VpnClient interface {
 type vpnClient struct {
 	cfg      *config
 	dialOpts []grpc.DialOption
-	auth     auth.AuthMethod
+	auth     auth.ClientAuthMethod
 	jwt      string
 
 	tun         *water.Interface

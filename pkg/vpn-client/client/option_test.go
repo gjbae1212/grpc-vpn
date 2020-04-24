@@ -78,8 +78,8 @@ func TestWithAuthMethod(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input  auth.AuthMethod
-		output auth.AuthMethod
+		input  auth.ClientAuthMethod
+		output auth.ClientAuthMethod
 	}{
 		"success": {
 			input:  temp,

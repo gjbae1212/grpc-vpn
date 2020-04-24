@@ -49,15 +49,33 @@ func startRun() commandRun {
 			opts = append(opts, client.WithTlsCertification(defaultConfig.TlsCertification))
 		}
 
-		// TODO: AUTH(GOOGLE, AWS)
+		// aws authentication
+		method1, ok1 := defaultConfig.Auth.ClientAuthForAwsIAM()
+		if ok1 {
+			opts = append(opts, client.WithAuthMethod(method1))
+		}
+
+		// google authentication
+		method2, ok2 := defaultConfig.Auth.ClientAuthForGoogleOpenID()
+		if ok2 {
+			opts = append(opts, client.WithAuthMethod(method2))
+		}
+
+		// if both method1 and method2 is empty.
+		if !ok1 && !ok2 {
+			method3, _ := defaultConfig.Auth.ClientAuthForTest()
+			opts = append(opts, client.WithAuthMethod(method3))
+		}
 
 		client, err := client.NewVpnClient(opts...)
 		if err != nil {
-			log.Panicln(color.RedString("[ERR] %s", err.Error()))
+			log.Println(color.RedString("[ERR] %s", err.Error()))
+			os.Exit(1)
 		}
 
 		if err := client.Run(); err != nil {
-			log.Panicln(color.RedString("[ERR] %s", err.Error()))
+			log.Println(color.RedString("[ERR] %s", err.Error()))
+			os.Exit(1)
 		}
 	}
 }

@@ -13,7 +13,7 @@ type config struct {
 	serverAddr       string
 	serverPort       string
 	tlsCertification string
-	authMethod       auth.AuthMethod
+	authMethod       auth.ClientAuthMethod
 }
 
 // OptionFunc is a function for Option interface.
@@ -43,7 +43,7 @@ func WithTlsCertification(cert string) OptionFunc {
 }
 
 // WithAuthMethod returns OptionFunc for inserting auth method.
-func WithAuthMethod(f auth.AuthMethod) OptionFunc {
+func WithAuthMethod(f auth.ClientAuthMethod) OptionFunc {
 	return func(c *config) {
 		c.authMethod = f
 	}

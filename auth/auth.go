@@ -1,8 +1,11 @@
 package auth
 
 import (
-	auth_aws_iam "github.com/gjbae1212/grpc-vpn/auth/aws_iam"
-	auth_google_openid "github.com/gjbae1212/grpc-vpn/auth/google_openid"
+	"context"
+	"time"
+
+	"github.com/gjbae1212/grpc-vpn/internal"
+
 	protocol "github.com/gjbae1212/grpc-vpn/grpc/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -19,30 +22,90 @@ const (
 	Bearer              = "bearer"
 )
 
-// ServerConfig is a config for authorization in server.
-type ServerConfig struct {
-	GoogleOpenId *auth_google_openid.Config
-	AwsIAM       *auth_aws_iam.Config
+// Config is a config for authorization in server.
+type Config struct {
+	GoogleOpenId *GoogleOpenIDConfig
+	AwsIAM       *AwsIamConfig
 }
 
-type AuthMethod func(conn protocol.VPNClient) (jwt string, err error)
+type ClientAuthMethod func(conn protocol.VPNClient) (jwt string, err error)
 
-// AuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
-func (c *ServerConfig) AuthForGoogleOpenID() (interceptor grpc.UnaryServerInterceptor, ok bool) {
+// ServerAuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
+func (c *Config) ServerAuthForGoogleOpenID() (grpc.UnaryServerInterceptor, bool) {
 	if c.GoogleOpenId == nil || c.GoogleOpenId.ClientId == "" ||
-		c.GoogleOpenId.ClientSecret == "" || c.GoogleOpenId.RedirectURL == "" {
+		c.GoogleOpenId.ClientSecret == "" {
 		return nil, false
 	}
-	return auth_google_openid.UnaryServerInterceptor(c.GoogleOpenId.ClientId,
-		c.GoogleOpenId.ClientSecret, c.GoogleOpenId.RedirectURL), true
+	return c.GoogleOpenId.unaryServerInterceptor(), true
 }
 
-// AuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
-func (c *ServerConfig) AuthForAwsIAM() (interceptor grpc.UnaryServerInterceptor, ok bool) {
+// ServerAuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
+func (c *Config) ServerAuthForAwsIAM() (grpc.UnaryServerInterceptor, bool) {
 	if c.AwsIAM == nil || c.AwsIAM.AccessKey == "" || c.AwsIAM.SecretAccessKey == "" {
 		return nil, false
 	}
-	return auth_aws_iam.UnaryServerInterceptor(c.AwsIAM.AccessKey, c.AwsIAM.SecretAccessKey), true
+	return c.AwsIAM.unaryServerInterceptor(), true
+}
+
+// ServerAuthForTest returns interceptor and bool value(whether exist or not).
+func (c *Config) ServerAuthForTest() (grpc.UnaryServerInterceptor, bool) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		auth, ok := req.(*protocol.AuthRequest)
+		if !ok {
+			return handler(ctx, req)
+		}
+		if auth.AuthType != protocol.AuthType_AT_GOOGLE_TEST {
+			return handler(ctx, req)
+		}
+		// inject user(vpn-test)
+		newCtx := context.WithValue(ctx, UserCtxName, "vpn-test")
+		return handler(newCtx, req)
+	}, true
+}
+
+// ClientAuthForGoogleOpenID is returns Auth Method for Google Open ID.
+func (c *Config) ClientAuthForGoogleOpenID() (ClientAuthMethod, bool) {
+	if c.GoogleOpenId == nil || c.GoogleOpenId.ClientId == "" ||
+		c.GoogleOpenId.ClientSecret == "" {
+		return nil, false
+	}
+	return c.GoogleOpenId.clientAuthMethod(), true
+}
+
+// ClientAuthForAwsIAM is returns Auth Method for AWS IAM.
+func (c *Config) ClientAuthForAwsIAM() (ClientAuthMethod, bool) {
+	if c.AwsIAM == nil || c.AwsIAM.AccessKey == "" || c.AwsIAM.SecretAccessKey == "" {
+		return nil, false
+	}
+
+	return c.AwsIAM.clientAuthMethod(), true
+}
+
+// ClientAuthForTest is returns Auth Method for Test.
+func (c *Config) ClientAuthForTest() (ClientAuthMethod, bool) {
+	return func(conn protocol.VPNClient) (jwt string, err error) {
+		// Timeout 30 seconds
+		ctx := context.Background()
+		timeout := 30 * time.Second
+		newctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		// call default auth
+		result, err := conn.Auth(newctx, &protocol.AuthRequest{
+			AuthType: protocol.AuthType_AT_GOOGLE_TEST,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		// extract JWT
+		switch result.ErrorCode {
+		case protocol.ErrorCode_EC_SUCCESS:
+			return result.Jwt, nil
+		default:
+			return "", internal.ErrorUnauthorized
+		}
+	}, true
 }
 
 // JWTAuthHeaderForGRPC returns JWT Auth Header for GRPC.

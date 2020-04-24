@@ -1,29 +1,26 @@
 package auth
 
 import (
-	auth_aws_iam "github.com/gjbae1212/grpc-vpn/auth/aws_iam"
-	auth_google_openid "github.com/gjbae1212/grpc-vpn/auth/google_openid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestServerConfig_AuthForAwsIAM(t *testing.T) {
+func TestConfig_ServerAuthForGoogleOpenID(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		cfg *ServerConfig
+		cfg *Config
 		ok  bool
 	}{
 		"false": {
-			cfg: &ServerConfig{},
+			cfg: &Config{},
 			ok:  false,
 		},
 		"true": {
-			cfg: &ServerConfig{
-				GoogleOpenId: &auth_google_openid.Config{
+			cfg: &Config{
+				GoogleOpenId: &GoogleOpenIDConfig{
 					ClientId:     "allan",
 					ClientSecret: "allan",
-					RedirectURL:  "allan",
 				},
 			},
 			ok: true,
@@ -31,25 +28,25 @@ func TestServerConfig_AuthForAwsIAM(t *testing.T) {
 	}
 
 	for _, t := range tests {
-		_, ok := t.cfg.AuthForGoogleOpenID()
+		_, ok := t.cfg.ServerAuthForGoogleOpenID()
 		assert.Equal(t.ok, ok)
 	}
 }
 
-func TestServerConfig_AuthForGoogleOpenID(t *testing.T) {
+func TestConfig_ServerAuthForAwsIAM(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		cfg *ServerConfig
+		cfg *Config
 		ok  bool
 	}{
 		"false": {
-			cfg: &ServerConfig{},
+			cfg: &Config{},
 			ok:  false,
 		},
 		"true": {
-			cfg: &ServerConfig{
-				AwsIAM: &auth_aws_iam.Config{
+			cfg: &Config{
+				AwsIAM: &AwsIamConfig{
 					AccessKey:       "allan",
 					SecretAccessKey: "allan",
 				},
@@ -59,7 +56,102 @@ func TestServerConfig_AuthForGoogleOpenID(t *testing.T) {
 	}
 
 	for _, t := range tests {
-		_, ok := t.cfg.AuthForAwsIAM()
+		_, ok := t.cfg.ServerAuthForAwsIAM()
+		assert.Equal(t.ok, ok)
+	}
+}
+
+func TestConfig_ServerAuthForTest(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		cfg *Config
+		ok  bool
+	}{
+		"true": {
+			cfg: &Config{},
+			ok:  true,
+		},
+	}
+
+	for _, t := range tests {
+		_, ok := t.cfg.ServerAuthForTest()
+		assert.Equal(t.ok, ok)
+	}
+}
+
+func TestConfig_ClientAuthForAwsIAM(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		cfg *Config
+		ok  bool
+	}{
+		"false": {
+			cfg: &Config{},
+			ok:  false,
+		},
+		"true": {
+			cfg: &Config{
+				AwsIAM: &AwsIamConfig{
+					AccessKey:       "allan",
+					SecretAccessKey: "allan",
+				},
+			},
+			ok: true,
+		},
+	}
+
+	for _, t := range tests {
+		_, ok := t.cfg.ClientAuthForAwsIAM()
+		assert.Equal(t.ok, ok)
+	}
+
+}
+
+func TestConfig_ClientAuthForGoogleOpenID(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		cfg *Config
+		ok  bool
+	}{
+		"false": {
+			cfg: &Config{},
+			ok:  false,
+		},
+		"true": {
+			cfg: &Config{
+				GoogleOpenId: &GoogleOpenIDConfig{
+					ClientId:     "allan",
+					ClientSecret: "allan",
+				},
+			},
+			ok: true,
+		},
+	}
+
+	for _, t := range tests {
+		_, ok := t.cfg.ClientAuthForGoogleOpenID()
+		assert.Equal(t.ok, ok)
+	}
+}
+
+func TestConfig_ClientAuthForTest(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		cfg *Config
+		ok  bool
+	}{
+		"true": {
+			cfg: &Config{},
+			ok:  true,
+		},
+	}
+
+	for _, t := range tests {
+		_, ok := t.cfg.ClientAuthForTest()
 		assert.Equal(t.ok, ok)
 	}
 }

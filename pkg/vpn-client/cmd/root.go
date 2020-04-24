@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/gjbae1212/grpc-vpn/auth"
-	auth_aws_iam "github.com/gjbae1212/grpc-vpn/auth/aws_iam"
-	auth_google_openid "github.com/gjbae1212/grpc-vpn/auth/google_openid"
 	"github.com/gjbae1212/grpc-vpn/internal"
 
 	"github.com/fatih/color"
@@ -32,7 +30,7 @@ type config struct {
 	Addr             string
 	Port             string
 	TlsCertification string
-	Auth             auth.ServerConfig
+	Auth             auth.Config
 }
 
 type commandRun func(cmd *cobra.Command, args []string)
@@ -91,21 +89,19 @@ func setConfig(cfgPath string) error {
 			for k, v := range value.(map[interface{}]interface{}) {
 				switch k {
 				case "google_openid":
-					defaultConfig.Auth.GoogleOpenId = &auth_google_openid.Config{}
+					defaultConfig.Auth.GoogleOpenId = &auth.GoogleOpenIDConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "client_id":
 							defaultConfig.Auth.GoogleOpenId.ClientId = internal.InterfaceToString(vv)
 						case "client_secret":
 							defaultConfig.Auth.GoogleOpenId.ClientSecret = internal.InterfaceToString(vv)
-						case "redirect_url":
-							defaultConfig.Auth.GoogleOpenId.RedirectURL = internal.InterfaceToString(vv)
 						default:
 							return fmt.Errorf("[ERR] unknown config %s", kk)
 						}
 					}
 				case "aws_iam":
-					defaultConfig.Auth.AwsIAM = &auth_aws_iam.Config{}
+					defaultConfig.Auth.AwsIAM = &auth.AwsIamConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "access_key":

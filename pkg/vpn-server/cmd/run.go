@@ -58,15 +58,20 @@ func startRun() commandRun {
 
 		// apply auth interceptors
 		var interceptors []grpc.UnaryServerInterceptor
-		if auth1, ok := defaultConfig.Auth.AuthForGoogleOpenID(); ok {
+		if auth1, ok := defaultConfig.Auth.ServerAuthForGoogleOpenID(); ok {
 			interceptors = append(interceptors, auth1)
 		}
-		if auth2, ok := defaultConfig.Auth.AuthForAwsIAM(); ok {
+		if auth2, ok := defaultConfig.Auth.ServerAuthForAwsIAM(); ok {
 			interceptors = append(interceptors, auth2)
 		}
-		if len(interceptors) > 0 {
-			opts = append(opts, server.WithGrpcUnaryInterceptors(interceptors))
+
+		// if interceptors for auth isn't exist, it is test mode(bypass authentication).
+		if len(interceptors) == 0 {
+			testAuth, _ := defaultConfig.Auth.ServerAuthForTest()
+			interceptors = append(interceptors, testAuth)
 		}
+
+		opts = append(opts, server.WithGrpcUnaryInterceptors(interceptors))
 
 		// create server
 		server, err := server.NewVpnServer(opts...)

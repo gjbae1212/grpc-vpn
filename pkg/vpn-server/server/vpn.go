@@ -67,12 +67,13 @@ func (v *vpn) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.Au
 	_ = req
 
 	var user string
-	if ctx.Value(auth.UserCtxName) == nil {
-		user = "unknown"
-	} else {
+	ip := ctx.Value(ipCtxName).(net.IP)
+	if ctx.Value(auth.UserCtxName) == nil { // fail
+		defaultLogger.Info(color.RedString("[NOT-ISSUE] origin IP(%s)", ip.String()))
+		return &protocol.AuthResponse{ErrorCode: protocol.ErrorCode_EC_INVALID_AUTHORIZATION}, nil
+	} else { // success
 		user = ctx.Value(auth.UserCtxName).(string)
 	}
-	ip := ctx.Value(ipCtxName).(net.IP)
 
 	// make jwt token
 	claims := &jwt.StandardClaims{

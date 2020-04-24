@@ -21,8 +21,13 @@ message IPPacket {
 }
 
 message AuthRequest {
-    message GoogleOpenID {}
-    message AwsIam {}
+    message GoogleOpenID {
+        string code = 1;
+    }
+    message AwsIam {
+        string access_key = 1;
+        string secret_access_key = 2;
+    }
 
     AuthType auth_type = 1; // auth type
     GoogleOpenID google_open_id = 2; // support google openid connect
@@ -37,8 +42,9 @@ message AuthResponse {
 
 enum AuthType {
     AT_NONE = 0; // unknown
-    AT_GOOGLE_OPEN_ID = 1; // google open id
-    AT_AWS_IAM = 2; // aws iam
+    AT_GOOGLE_TEST = 1;  // test
+    AT_GOOGLE_OPEN_ID = 2; // google open id
+    AT_AWS_IAM = 3; // aws iam
 }
 
 enum ErrorCode {

@@ -19,11 +19,11 @@ func SetCommandLogger(logger *Logger) {
 func CommandExec(command string, args []string) error {
 	cmd := exec.Command(command, args...)
 	if err := cmd.Run(); err != nil {
-		commandLogger.Error(color.RedString("[fail-cmd] %s %s [Reason]: %s",
+		commandLogger.Error(color.RedString("[FAIL-CMD] %s %s [Reason]: %s",
 			command, strings.Join(args, " ")), err.Error())
 		return err
 	} else {
-		commandLogger.Info(color.GreenString("[success-cmd] %s %s", command, strings.Join(args, " ")))
+		commandLogger.Info(color.GreenString("[SUCCESS-CMD] %s %s", command, strings.Join(args, " ")))
 	}
 	return nil
 }
