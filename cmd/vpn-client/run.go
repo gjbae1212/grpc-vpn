@@ -1,13 +1,12 @@
-package cmd
+package main
 
 import (
 	"log"
 	"os"
 	"runtime"
 
-	"github.com/gjbae1212/grpc-vpn/pkg/vpn-client/client"
-
 	"github.com/fatih/color"
+	"github.com/gjbae1212/grpc-vpn/client"
 	"github.com/spf13/cobra"
 )
 

@@ -1,10 +1,11 @@
 package client
 
 import (
+	"testing"
+
 	"github.com/gjbae1212/grpc-vpn/auth"
 	protocol "github.com/gjbae1212/grpc-vpn/grpc/go"
-	"github.com/tj/assert"
-	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWithServerAddr(t *testing.T) {

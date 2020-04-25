@@ -1,10 +1,11 @@
 package client
 
 import (
+	"net"
+
 	"github.com/fatih/color"
 	"github.com/gjbae1212/grpc-vpn/internal"
 	"github.com/songgao/water"
-	"net"
 )
 
 type Rollback struct {

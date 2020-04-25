@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"google.golang.org/grpc/keepalive"
 	"net"
 	"os"
 	"os/signal"
@@ -14,6 +13,8 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"google.golang.org/grpc/keepalive"
 
 	"github.com/fatih/color"
 	"github.com/gjbae1212/grpc-vpn/auth"

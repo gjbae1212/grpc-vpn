@@ -1,12 +1,13 @@
-package cmd
+package main
 
 import (
 	"log"
 	"os"
 	"runtime"
 
+	"github.com/gjbae1212/grpc-vpn/server"
+
 	"github.com/fatih/color"
-	"github.com/gjbae1212/grpc-vpn/pkg/vpn-server/server"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 )

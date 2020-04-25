@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gjbae1212/grpc-vpn/internal"
-	"github.com/tj/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetDefaultLogger(t *testing.T) {

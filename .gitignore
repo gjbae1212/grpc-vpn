@@ -1,5 +1,5 @@
 .idea
 tmp.txt
 *.test
-pkg/vpn-server/vpn-server
-pkg/vpn-client/vpn-client
+cmd/vpn-server/vpn-server
+cmd/vpn-client/vpn-client

@@ -1,6 +1,9 @@
 package server
 
 import (
+	"io"
+	"net"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/fatih/color"
 	protocol "github.com/gjbae1212/grpc-vpn/grpc/go"
@@ -8,8 +11,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/songgao/water/waterutil"
 	"go.uber.org/atomic"
-	"io"
-	"net"
 )
 
 const (

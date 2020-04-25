@@ -1,8 +1,9 @@
-package cmd
+package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetConfig(t *testing.T) {
@@ -12,7 +13,7 @@ func TestSetConfig(t *testing.T) {
 		path  string
 		isErr bool
 	}{
-		"success": {path: "../sample.yaml"},
+		"success": {path: "sample.yaml"},
 	}
 
 	for _, t := range tests {

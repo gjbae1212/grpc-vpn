@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gjbae1212/grpc-vpn/auth"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/gjbae1212/grpc-vpn/auth"
 	protocol "github.com/gjbae1212/grpc-vpn/grpc/go"
-	"github.com/tj/assert"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	health_pb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
