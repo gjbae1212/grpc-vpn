@@ -38,11 +38,6 @@ type config struct {
 
 type commandRun func(cmd *cobra.Command, args []string)
 
-// Execute runs main command.
-func Execute() {
-	rootCmd.Execute()
-}
-
 func initConfig() {
 	cfgPath := viper.GetString("config")
 
