@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gjbae1212/grpc-vpn/client"
+	"github.com/mitchellh/go-ps"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,26 @@ func startPreRun() commandRun {
 		if os.Getuid() != 0 {
 			log.Printf("%s %s", color.RedString("[RETRY][COMMAND]"),
 				color.CyanString("`sudo vpn-client run`"))
+			os.Exit(1)
+		}
+
+		// if already process is running, exit.
+		processes, err := ps.Processes()
+		if err != nil {
+			log.Printf(color.RedString(err.Error()))
+			os.Exit(1)
+		}
+
+		processMap := map[string]int{}
+		var processName string
+		for _, process := range processes {
+			if process.Pid() == os.Getpid() {
+				processName = process.Executable()
+			}
+			processMap[process.Executable()] += 1
+		}
+		if processMap[processName] >= 2 {
+			log.Printf(color.RedString("[ERR] ALREADY %s RUNNING", processName))
 			os.Exit(1)
 		}
 	}
