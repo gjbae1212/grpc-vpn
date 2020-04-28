@@ -14,6 +14,8 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/sirupsen/logrus"
+
 	"google.golang.org/grpc/keepalive"
 
 	"github.com/fatih/color"
@@ -42,7 +44,7 @@ var (
 )
 
 var (
-	defaultLogger *internal.Logger
+	defaultLogger *logrus.Logger
 )
 
 // VpnClient is an interface for connecting to VPN server.
@@ -472,10 +474,17 @@ func NewVpnClient(opts ...Option) (VpnClient, error) {
 }
 
 // SetDefaultLogger is to set logger for vpn client.
-func SetDefaultLogger(logger *internal.Logger) {
+func SetDefaultLogger(logger *logrus.Logger) {
 	defaultLogger = logger
 }
 
 func init() {
-	defaultLogger, _ = internal.NewLogger("")
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{
+		ForceColors:   true,
+		DisableColors: false,
+		FullTimestamp: true,
+	})
+	logger.SetOutput(os.Stdout)
+	defaultLogger = logger
 }

@@ -3,14 +3,15 @@ package client
 import (
 	"testing"
 
-	"github.com/gjbae1212/grpc-vpn/internal"
+	"github.com/sirupsen/logrus"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetDefaultLogger(t *testing.T) {
 	assert := assert.New(t)
 	tests := map[string]struct {
-		input *internal.Logger
+		input *logrus.Logger
 	}{
 		"success": {input: nil},
 	}

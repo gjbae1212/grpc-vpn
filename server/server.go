@@ -12,8 +12,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/gjbae1212/grpc-vpn/auth"
 
@@ -49,7 +52,7 @@ var (
 		WithGrpcPort("8080"),
 	}
 
-	defaultLogger *internal.Logger
+	defaultLogger *logrus.Logger
 )
 
 // VpnServer is an interface for utilizing vpn operations.
@@ -64,7 +67,7 @@ type vpnServer struct {
 }
 
 // SetDefaultLogger is to set logger for vpn server.
-func SetDefaultLogger(logger *internal.Logger) {
+func SetDefaultLogger(logger *logrus.Logger) {
 	defaultLogger = logger
 }
 
@@ -258,5 +261,12 @@ func checkJwt(srv interface{}, stream grpc.ServerStream) (*jwt.Token, error) {
 }
 
 func init() {
-	defaultLogger, _ = internal.NewLogger("")
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{
+		ForceColors:   true,
+		DisableColors: false,
+		FullTimestamp: true,
+	})
+	logger.SetOutput(os.Stdout)
+	defaultLogger = logger
 }

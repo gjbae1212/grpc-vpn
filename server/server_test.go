@@ -3,12 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"testing"
 	"time"
 
 	protocol "github.com/gjbae1212/grpc-vpn/grpc/go"
-	"github.com/gjbae1212/grpc-vpn/internal"
-
 	health_pb "google.golang.org/grpc/health/grpc_health_v1"
 
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -136,7 +135,7 @@ func TestVpnServer_Run(t *testing.T) {
 func TestSetDefaultLogger(t *testing.T) {
 	assert := assert.New(t)
 	tests := map[string]struct {
-		input *internal.Logger
+		input *logrus.Logger
 	}{
 		"success": {input: nil},
 	}
