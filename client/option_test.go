@@ -98,3 +98,24 @@ func TestWithAuthMethod(t *testing.T) {
 
 	}
 }
+
+func TestWithTlsInsecure(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		input  bool
+		output bool
+	}{
+		"success": {
+			input:  true,
+			output: true,
+		},
+	}
+
+	for _, t := range tests {
+		c := &config{}
+		f := WithTlsInsecure(t.input)
+		f(c)
+		assert.Equal(t.output, c.tlsInsecure)
+	}
+}

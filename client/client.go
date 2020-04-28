@@ -40,7 +40,9 @@ const (
 )
 
 var (
-	defaultOptions = []Option{}
+	defaultOptions = []Option{
+		WithTlsInsecure(true),
+	}
 )
 
 var (
@@ -455,7 +457,8 @@ func NewVpnClient(opts ...Option) (VpnClient, error) {
 		if ok := roots.AppendCertsFromPEM([]byte(cfg.tlsCertification)); !ok {
 			return nil, errors.Wrapf(internal.ErrorInvalidParams, "TLS Certification Invalid Method: NewVpnClient")
 		}
-		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: roots})))
+		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+			RootCAs: roots, InsecureSkipVerify: cfg.tlsInsecure})))
 	} else {
 		dialOpts = append(dialOpts, grpc.WithInsecure())
 	}

@@ -13,6 +13,7 @@ type config struct {
 	serverAddr       string
 	serverPort       string
 	tlsCertification string
+	tlsInsecure      bool
 	authMethod       auth.ClientAuthMethod
 }
 
@@ -46,5 +47,12 @@ func WithTlsCertification(cert string) OptionFunc {
 func WithAuthMethod(f auth.ClientAuthMethod) OptionFunc {
 	return func(c *config) {
 		c.authMethod = f
+	}
+}
+
+// WithTlsInsecure returns OptionFunc for inserting tls insecure.
+func WithTlsInsecure(b bool) OptionFunc {
+	return func(c *config) {
+		c.tlsInsecure = b
 	}
 }
