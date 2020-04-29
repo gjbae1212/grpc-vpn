@@ -53,6 +53,8 @@ var (
 type VpnClient interface {
 	Run() error
 	Close() error
+	JWT() string
+	MyVpnIp() string
 }
 
 type vpnClient struct {
@@ -144,6 +146,21 @@ func (vc *vpnClient) Close() error {
 	}
 	defaultLogger.Error(color.RedString("[EXIT] BYE"))
 	return nil
+}
+
+// JWT returns jwt string
+func (vc *vpnClient) JWT() string {
+	return vc.jwt
+}
+
+// MyVpnIP returns my vpn ip.
+func (vc *vpnClient) MyVpnIp() string {
+	vc.networkLock.RLock()
+	defer vc.networkLock.RUnlock()
+	if vc.vpnMyIP != nil {
+		return vc.vpnMyIP.String()
+	}
+	return ""
 }
 
 func (vc *vpnClient) vpnConnect(jwt string) error {
