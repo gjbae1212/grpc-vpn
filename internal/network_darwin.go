@@ -35,19 +35,14 @@ func SetDefaultGateway(gw, tun string) error {
 
 // SetPacketForward sets ip packet forward.
 func SetPacketForward(ok bool) error {
+	// TODO: Don't support
 	return nil
 }
 
 // SetPostRoutingMasquerade sets outbound packets masquerade.
 func SetPostRoutingMasquerade(ok bool) error {
-	var sub string
-	if ok {
-		sub = "-t nat -A POSTROUTING -j MASQUERADE"
-	} else {
-		sub = "-t nat -D POSTROUTING 1"
-	}
-	args := strings.Split(sub, " ")
-	return CommandExec("iptables", args)
+	// TODO: Don't support
+	return nil
 }
 
 // SetGoogleDNS sets google dns

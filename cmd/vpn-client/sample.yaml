@@ -1,0 +1,11 @@
+vpn:
+  addr: ""
+  port: ""
+  tls_certification: ""
+auth:
+  google_openid:
+    client_id: ""
+    client_secret: ""
+  aws_iam:
+    access_key: ""
+    secret_access_key: ""

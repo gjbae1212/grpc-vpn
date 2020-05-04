@@ -1,0 +1,19 @@
+vpn:
+  port: ""
+  subnet: ""
+  log_path: ""
+  jwt_salt: ""
+  tls_certification: ""
+  tls_pem: ""
+
+auth:
+  google_openid:
+    client_id: ""
+    client_secret: ""
+    hd: ""
+    allow_emails:
+      -
+  aws_iam:
+    account_id: ""
+    allow_users:
+      -

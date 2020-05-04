@@ -58,11 +58,13 @@ func SetPostRoutingMasquerade(ok bool) error {
 
 // SetGoogleDNS sets google dns
 func SetGoogleDNS() error {
+	// TODO: Don't support
 	return nil
 }
 
 // SetDeleteDNS sets google dns
 func SetDeleteDNS() error {
+	// TODO: Don't support
 	return nil
 }
 
