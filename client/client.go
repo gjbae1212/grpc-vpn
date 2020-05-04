@@ -81,6 +81,9 @@ type vpnClient struct {
 	in  chan *protocol.IPPacket // in queue
 	out chan *protocol.IPPacket // out queue
 
+	retryLock         sync.RWMutex // retry lock
+	lastConnectedTime time.Time    // last connected time
+
 	networkRollback *Rollback                   // network rollback
 	backoff         *backoff.ExponentialBackOff // backoff
 	exit            chan bool                   // exit channel
@@ -197,13 +200,19 @@ func (vc *vpnClient) vpnConnect(jwt string) error {
 	if err := vc.setVPN(vpnIP, vpnGateway, vpnSubnet); err != nil {
 		return errors.Wrapf(internal.ErrorReceiveUnknownPacket, "Method: connect")
 	}
-
+	vc.lastConnectedTime = time.Now()
 	return nil
 }
 
 func (vc *vpnClient) retryVpnConnect() error {
-	vc.networkRollback.Close()
+	vc.retryLock.Lock()
+	defer vc.retryLock.Unlock()
+	// pass retry
+	if vc.lastConnectedTime.Add(5*time.Second).Unix() > time.Now().Unix() {
+		return nil
+	}
 
+	vc.networkRollback.Close()
 	for i := 0; i < 10; i++ {
 		defaultLogger.Warn(color.YellowString("[RETRY] vpn connect %d", i+1))
 		time.Sleep(vc.backoff.NextBackOff())
@@ -313,11 +322,15 @@ func (vc *vpnClient) getGRPCConnectionPipe() protocol.VPN_ExchangeClient {
 	return vc.connPipe
 }
 
+func (vc *vpnClient) getTun() *water.Interface {
+	vc.networkLock.RLock()
+	defer vc.networkLock.RUnlock()
+	return vc.tun
+}
+
 func (vc *vpnClient) readTun() {
 	for {
-		vc.networkLock.RLock()
-		tun := vc.tun
-		vc.networkLock.RUnlock()
+		tun := vc.getTun()
 
 		packet := make([]byte, internal.TunPacketBufferSize)
 		n, err := tun.Read(packet)
@@ -351,9 +364,7 @@ func (vc *vpnClient) writeTun() {
 	for {
 		select {
 		case packet := <-vc.in:
-			vc.networkLock.RLock()
-			tun := vc.tun
-			vc.networkLock.RUnlock()
+			tun := vc.getTun()
 
 			size, err := tun.Write(packet.Packet1.Raw)
 			if err != nil {
@@ -381,6 +392,7 @@ WriteGRPC:
 			pipe := vc.getGRPCConnectionPipe()
 			if err := pipe.Send(packet); err != nil {
 				defaultLogger.Error(color.RedString("[ERR] writeToGRPC %s", err.Error()))
+				time.Sleep(1 * time.Second)
 				// retry connection
 				if suberr := vc.retryVpnConnect(); suberr != nil {
 					defaultLogger.Error(color.RedString("[ERR] writeToGRPC %s", suberr.Error()))
@@ -394,13 +406,22 @@ WriteGRPC:
 }
 
 func (vc *vpnClient) readToGRPC() {
+ReadGRPC:
 	for {
 		pipe := vc.getGRPCConnectionPipe()
 		packet, err := pipe.Recv()
 		if err != nil {
 			defaultLogger.Error(color.RedString("[ERR] readToGRPC %s", err.Error()))
 			time.Sleep(1 * time.Second)
-			continue
+			// retry connection
+			if suberr := vc.retryVpnConnect(); suberr != nil {
+				defaultLogger.Error(color.RedString("[ERR] readToGRPC %s", suberr.Error()))
+				// Good Bye
+				vc.exit <- true
+				break ReadGRPC
+			} else {
+				continue
+			}
 		}
 
 		if packet.ErrorCode != protocol.ErrorCode_EC_SUCCESS {
