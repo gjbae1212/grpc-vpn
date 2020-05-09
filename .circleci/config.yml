@@ -15,4 +15,4 @@ jobs:
           name: RUN UNIT TEST
           environment:
             GO111MODULE: "on"
-          command: bash script.sh test
+          command: bash script/local.sh test
