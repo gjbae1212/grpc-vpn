@@ -9,27 +9,38 @@
 
 **GRPC-VPN** is the **VPN** server and client which supports authentications such as Google OpenId Connect or AWS IAM, using GRPC.  
   
-Other authentications(LDAP, ...) will be to apply it, if you will implement GRPC interceptor for VPN server and ClientAuthMethod for VPN client. (Refer to **github.com/gjbae1212/grpc-vpn/auth**)
+Other authentications(LDAP, ...) will be to apply it, if you will implement GRPC interceptor for VPN server and ClientAuthMethod for VPN client.   
+(Refer to **github.com/gjbae1212/grpc-vpn/auth**)
+
+<br/>
 
 **Motivation**  
 Of course, the well-made VPN is already around us.  
+
 But many VPN aren't to support multiple authentications. (Generally support to LDAP, configuration file having shared key)  
-I want to apply multiple authentications by circumstances, so protocol for authentication should organize the plugin which implements it.
+  
+I want to apply multiple authentications by circumstances, so protocol for authentication should organize the plugin which implements it.  
+
+<br/>
 
 **GRPC-VPN**
 - It's composed of server and client.    
 - It's implemented using **Golang**.
-- Communicates via GRPC.
+- Communicates via **GRPC**.
 - Use Tun device.
-- Server on VPN can only run on Linux, and Client on VPN can run on Linux or Mac.
-- Supports to inject custom authentication function.
+- Server on VPN can only run on **Linux**, and Client on VPN can run on **Linux** or **Mac**.
+- Supports to inject **custom authentication function**.
   
 ## Why GRPC?
 For multiple authentications will support, authentication flow and connection flow should definitely distinguish.  
+  
 Authentication flow needs to a little unification protocol for applying various case.  
+  
 Connection flow should have the unitary policy regardless of authentications.  
-So I was to use JWT authentication and GRPC.  
-Using GRPC can implement the unification authentication flow, also using JWT and GRPC stream can connect VPN regardless of authentications.    
+So I was to use JWT authentication and GRPC.   
+
+Using GRPC can implement the unification authentication flow, also using JWT and GRPC stream can connect VPN regardless of authentications.   
+    
 <br/>
 <p align="center">
 <img src="https://storage.googleapis.com/gjbae1212-asset/grpc-vpn/main.png"/>
@@ -39,7 +50,7 @@ Using GRPC can implement the unification authentication flow, also using JWT and
 ## Getting Started
 **Server on VPN can only run on Linux, and Client on VPN can run on Linux or Mac.**
 
-### Use Library
+### 1. Use Library
 > You can write code and run, if you utilize it on circumstances.   
 
 **1. Non Authentication**
@@ -182,9 +193,8 @@ c, _ := client.NewVpnClient(
 )
 c.Run()
 ```
-<br/>
 
-### Use Standalone Application
+### 2. Use Standalone Application
 > You can run an application which already built.
 
 **1. Download or build**
