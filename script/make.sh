@@ -13,9 +13,17 @@ function gen_grpc
    protoc --go_out=plugins=grpc:$CURRENT/../grpc/go vpn.proto vpn-struct.proto
 }
 
-function build
+function build_vpn_server
 {
-   echo "build"
+   cd $CURRENT/../cmd/vpn-server
+   GOOS=linux GOARCH=amd64 go build -trimpath -ldflags='-s -w' -o $CURRENT/../dist/vpn-server-linux
+}
+
+function build_vpn_client
+{
+   cd $CURRENT/../cmd/vpn-client
+   GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags='-s -w' -o $CURRENT/../dist/vpn-client-darwin
+   GOOS=linux GOARCH=amd64 go build -trimpath -ldflags='-s -w' -o $CURRENT/../dist/vpn-client-linux
 }
 
 CMD=$1
