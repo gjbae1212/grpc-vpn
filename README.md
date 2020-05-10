@@ -58,7 +58,7 @@ Using GRPC can implement the unification authentication flow, also using JWT and
 # SERVER
 
 import (
-	"github.com/gjbae1212/grpc-vpn/server"
+    "github.com/gjbae1212/grpc-vpn/server"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
@@ -66,7 +66,7 @@ cfg := auth.Config{}
 authInterceptor, _ := cfg.ServerAuthForTest()
 
 s, _ = server.NewVpnServer(
-      server.WithVpnSubnet("ex) 192.168.0.100"),
+      server.WithVpnSubnet("ex) 192.168.0.100/24"),
       server.WithGrpcPort("ex) 443"),
       server.WithVpnJwtSalt("ex) jwt salt"),   
       server.WithGrpcTlsCertification("ex) tls cert"),
@@ -78,7 +78,7 @@ s.Run()
 # CLIENT
 
 import (
-	"github.com/gjbae1212/grpc-vpn/client"
+    "github.com/gjbae1212/grpc-vpn/client"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
@@ -100,7 +100,7 @@ c.Run()
 # SERVER
 
 import (
-	"github.com/gjbae1212/grpc-vpn/server"
+    "github.com/gjbae1212/grpc-vpn/server"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
@@ -114,7 +114,7 @@ cfg.GoogleOpenId = &auth.GoogleOpenIDConfig{
 authInterceptor, _ := cfg.ServerAuthForGoogleOpenID()
 
 s, _ = server.NewVpnServer(
-      server.WithVpnSubnet("ex) 192.168.0.100"),
+      server.WithVpnSubnet("ex) 192.168.0.100/24"),
       server.WithGrpcPort("ex) 443"),
       server.WithVpnJwtSalt("ex) jwt salt"),   
       server.WithGrpcTlsCertification("ex) tls cert"),
@@ -126,7 +126,7 @@ s.Run()
 # CLIENT
 
 import (
-	"github.com/gjbae1212/grpc-vpn/client"
+    "github.com/gjbae1212/grpc-vpn/client"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
@@ -150,7 +150,7 @@ c.Run()
 **3. Authentication(AWS IAM)**
 ```go
 import (
-	"github.com/gjbae1212/grpc-vpn/server"
+    "github.com/gjbae1212/grpc-vpn/server"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
@@ -162,7 +162,7 @@ cfg.AwsIAM = &auth.AwsIamConfig{
 authInterceptor, _ := cfg.ServerAuthForAwsIAM()
 
 s, _ = server.NewVpnServer(
-      server.WithVpnSubnet("ex) 192.168.0.100"),
+      server.WithVpnSubnet("ex) 192.168.0.100/24"),
       server.WithGrpcPort("ex) 443"),
       server.WithVpnJwtSalt("ex) jwt salt"),   
       server.WithGrpcTlsCertification("ex) tls cert"),
@@ -174,7 +174,7 @@ s.Run()
 # CLIENT
 
 import (
-	"github.com/gjbae1212/grpc-vpn/client"
+    "github.com/gjbae1212/grpc-vpn/client"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
@@ -211,7 +211,7 @@ server config(config.yaml)
 ```yaml
 vpn:
   port: "" # Required(vpn port)
-  subnet: "" # Required(vpn subnet)
+  subnet: "" # Required(vpn subnet(private ip range), ex) 192.168.0.100/24)
   log_path: "" # Required(log path)
   jwt_salt: "" # Required(random string)
   tls_certification: "" # Required(tls cert)
