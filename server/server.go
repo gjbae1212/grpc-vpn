@@ -142,6 +142,10 @@ func NewVpnServer(opts ...Option) (VpnServer, error) {
 
 // Run executes VPN Server.
 func (s *vpnServer) Run() error {
+	if s.config.grpcPort == "80" {
+		return fmt.Errorf("VPN-SERVER dosen't use 80 Port. Retry Other Port(Ex 443, 8080 ...)")
+	}
+
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", s.config.grpcPort))
 	if err != nil {
 		return errors.Wrapf(err, "Method: Run")
