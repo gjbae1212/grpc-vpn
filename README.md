@@ -278,7 +278,7 @@ auth:
 Run
 ```bash
 $ cd grpc-vpn/dist
-$ sudo vpn-server-linux run -c "config.yaml path" # sudo
+$ sudo vpn-server-linux run -c "config.yaml path" 
 ```
 <br/>
 
@@ -328,7 +328,12 @@ auth:
 Run
 ```bash
 $ cd grpc-vpn/dist
-$ sudo vpn-client-darwin run -c "config.yaml path" OR sudo vpn-client-linux run -c "config.yaml path" # sudo
+
+# MAC
+$ sudo vpn-client-darwin run -c "config.yaml path"
+
+# LINUX 
+$ sudo vpn-client-linux run -c "config.yaml path" 
 ```
 
 ## License
