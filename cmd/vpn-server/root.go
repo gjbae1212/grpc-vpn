@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gjbae1212/grpc-vpn/auth"
 	"github.com/gjbae1212/grpc-vpn/internal"
@@ -31,6 +32,7 @@ type config struct {
 	SubNet           string
 	LogPath          string
 	JwtSalt          string
+	JwtExpiration    time.Duration
 	TlsCertification string
 	TlsPem           string
 	Auth             auth.Config
@@ -81,6 +83,9 @@ func setConfig(cfgPath string) error {
 					defaultConfig.LogPath = internal.InterfaceToString(v)
 				case "jwt_salt":
 					defaultConfig.JwtSalt = internal.InterfaceToString(v)
+				case "jwt_expiration":
+					expire, _ := time.ParseDuration(internal.InterfaceToString(v))
+					defaultConfig.JwtExpiration = expire
 				case "tls_certification":
 					defaultConfig.TlsCertification = internal.InterfaceToString(v)
 				case "tls_pem":

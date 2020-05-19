@@ -3,6 +3,7 @@ vpn:
   subnet: ""
   log_path: ""
   jwt_salt: ""
+  jwt_expiration: ""
   tls_certification: ""
   tls_pem: ""
 

@@ -56,6 +56,9 @@ func startRun() commandRun {
 		if defaultConfig.TlsPem != "" {
 			opts = append(opts, server.WithGrpcTlsPem(defaultConfig.TlsPem))
 		}
+		if defaultConfig.JwtExpiration > 0 {
+			opts = append(opts, server.WithVpnJwtExpiration(defaultConfig.JwtExpiration))
+		}
 
 		// apply auth interceptors
 		var interceptors []grpc.UnaryServerInterceptor

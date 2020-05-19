@@ -218,6 +218,7 @@ vpn:
   subnet: "" # Required(vpn subnet(private ip range), ex) 192.168.0.100/24)
   log_path: "" # Required(log path)
   jwt_salt: "" # Required(random string)
+  jwt_expiration: "" # Required(expire-time in JWT), ex) 100ms, 10m, 2h30m, ...  
   tls_certification: "" # Required(tls cert)
   tls_pem: "" # Required(tls pem)
 
@@ -250,6 +251,7 @@ vpn:
   subnet: "192.168.0.100/24" 
   log_path: "" 
   jwt_salt: "hello-world" 
+  jwt_expiration: "1h10m"
   tls_certification: "blahblah" 
   tls_pem: "blahblah"
 auth:  
