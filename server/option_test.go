@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -49,6 +50,27 @@ func TestWithJwtSalt(t *testing.T) {
 		f := WithVpnJwtSalt(t.input)
 		f(c)
 		assert.Equal(t.output, c.vpnJwtSalt)
+	}
+}
+
+func TestWithVpnJwtExpiration(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		input  time.Duration
+		output time.Duration
+	}{
+		"success": {
+			input:  time.Hour,
+			output: time.Hour,
+		},
+	}
+
+	for _, t := range tests {
+		c := &config{}
+		f := WithVpnJwtExpiration(t.input)
+		f(c)
+		assert.Equal(t.output, c.vpnJwtExpiration)
 	}
 }
 

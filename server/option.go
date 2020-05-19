@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"google.golang.org/grpc"
 )
 
@@ -12,6 +14,7 @@ type Option interface {
 type config struct {
 	vpnSubNet              string
 	vpnJwtSalt             string
+	vpnJwtExpiration       time.Duration
 	grpcPort               string
 	grpcTlsCertification   string
 	grpcTlsPem             string
@@ -36,6 +39,13 @@ func WithVpnSubNet(vpnSubNet string) OptionFunc {
 func WithVpnJwtSalt(vpnJwtSalt string) OptionFunc {
 	return func(c *config) {
 		c.vpnJwtSalt = vpnJwtSalt
+	}
+}
+
+// WithVpnJwtExpiration returns OptionFunc for inserting VPN expiration time.
+func WithVpnJwtExpiration(exp time.Duration) OptionFunc {
+	return func(c *config) {
+		c.vpnJwtExpiration = exp
 	}
 }
 

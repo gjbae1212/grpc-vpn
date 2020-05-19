@@ -50,6 +50,7 @@ var (
 		WithVpnSubNet("10.10.10.1/24"),
 		WithVpnJwtSalt(internal.GenerateRandomString(16)),
 		WithGrpcPort("8080"),
+		WithVpnJwtExpiration(24 * time.Hour),
 	}
 
 	defaultLogger *logrus.Logger
@@ -125,7 +126,7 @@ func NewVpnServer(opts ...Option) (VpnServer, error) {
 	}
 
 	// make vpn
-	vpn, err := newVPN(cfg.vpnSubNet, cfg.vpnJwtSalt)
+	vpn, err := newVPN(cfg.vpnSubNet, cfg.vpnJwtSalt, cfg.vpnJwtExpiration)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Method: NewVpnServer")
 	}

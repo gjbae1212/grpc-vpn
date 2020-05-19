@@ -53,7 +53,8 @@ type vpn struct {
 	clientToServer chan *protocol.IPPacket // packets which flow from client to server.
 	serverToClient chan *protocol.IPPacket // packets which flow from server to client.
 
-	jwtSalt string // JWT Salt
+	jwtSalt       string        // JWT Salt
+	jwtExpiration time.Duration // JWT Expiration
 
 	exit     chan bool // exit channel
 	stopping bool
@@ -79,7 +80,7 @@ func (v *vpn) Auth(ctx context.Context, req *protocol.AuthRequest) (*protocol.Au
 	claims := &jwt.StandardClaims{
 		Audience:  user,
 		Subject:   "grpc-vpn-auth",
-		ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+		ExpiresAt: time.Now().Add(v.jwtExpiration).Unix(),
 		IssuedAt:  time.Now().Unix(),
 		Issuer:    "grpc-vpn",
 	}
@@ -342,7 +343,7 @@ func (v *vpn) loopServerToClient() {
 }
 
 // newVPN return new vpn object.
-func newVPN(subnet, jwtSalt string) (VPN, error) {
+func newVPN(subnet, jwtSalt string, jwtExpiration time.Duration) (VPN, error) {
 	if subnet == "" || jwtSalt == "" {
 		return nil, errors.Wrapf(internal.ErrorInvalidParams, "Method: %s", "newVPN")
 	}
@@ -352,6 +353,7 @@ func newVPN(subnet, jwtSalt string) (VPN, error) {
 		clientToServer: make(chan *protocol.IPPacket, queueSizeForClientToServer),
 		serverToClient: make(chan *protocol.IPPacket, queueSizeForServerToClient),
 		jwtSalt:        jwtSalt,
+		jwtExpiration:  jwtExpiration,
 		exit:           make(chan bool, 1),
 	}
 
