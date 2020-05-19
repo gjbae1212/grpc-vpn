@@ -424,6 +424,13 @@ ReadGRPC:
 			}
 		}
 
+		// exit when jwt is expired.
+		if packet.ErrorCode == protocol.ErrorCode_EC_EXPIRED_JWT {
+			defaultLogger.Error(color.RedString("[ERR] readToGRPC JWT Expired"))
+			vc.exit <- true
+			break ReadGRPC
+		}
+
 		if packet.ErrorCode != protocol.ErrorCode_EC_SUCCESS {
 			defaultLogger.Error(color.RedString("[ERR] readToGRPC %s", internal.ErrorReceiveUnknownPacket.Error()))
 			continue

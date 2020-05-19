@@ -3,6 +3,7 @@ package server
 import (
 	"io"
 	"net"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/fatih/color"
@@ -93,6 +94,9 @@ func (c *client) processReading() {
 
 // write packet
 func (c *client) processWriting() {
+	// make jwt checker
+	jwtChecker := time.NewTimer(5 * time.Minute)
+
 	for c.loop.Load() {
 		select {
 		case packet := <-c.in:
@@ -105,6 +109,21 @@ func (c *client) processWriting() {
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) exit signal",
 				c.user, c.originIP.String(), c.vpnIP.String()))
 			break
+		case <-jwtChecker.C:
+			// if JWT is expired, sending to error and break.
+			if c.jwt.Claims.Valid() != nil {
+				defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) expired JWT",
+					c.user, c.originIP.String(), c.vpnIP.String()))
+				packet := &protocol.IPPacket{
+					ErrorCode:  protocol.ErrorCode_EC_EXPIRED_JWT,
+					PacketType: protocol.IPPacketType_IPPT_UNKNOWN,
+				}
+				if err := c.stream.Send(packet); err != nil {
+					defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
+						c.user, c.originIP.String(), c.vpnIP.String(), err.Error()))
+				}
+				break
+			}
 		}
 	}
 	// flag off
