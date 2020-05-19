@@ -71,7 +71,8 @@ authInterceptor, _ := cfg.ServerAuthForTest()
 s, _ = server.NewVpnServer(
       server.WithVpnSubnet("ex) 192.168.0.100/24"),
       server.WithGrpcPort("ex) 443"),
-      server.WithVpnJwtSalt("ex) jwt salt"),   
+      server.WithVpnJwtSalt("ex) jwt salt"),  
+      server.WithVpnJwtExpiration(24 * time.Hour),
       server.WithGrpcTlsCertification("ex) tls cert"),
       server.WithGrpcWithGrpcTlsPem("ex) tls pem"),
       server.WithGrpcUnaryInterceptors(authInterceptor),  // authentication      
@@ -120,6 +121,7 @@ s, _ = server.NewVpnServer(
       server.WithVpnSubnet("ex) 192.168.0.100/24"),
       server.WithGrpcPort("ex) 443"),
       server.WithVpnJwtSalt("ex) jwt salt"),   
+      server.WithVpnJwtExpiration(24 * time.Hour),
       server.WithGrpcTlsCertification("ex) tls cert"),
       server.WithGrpcWithGrpcTlsPem("ex) tls pem"),
       server.WithGrpcUnaryInterceptors(authInterceptor),  // authentication      
@@ -168,6 +170,7 @@ s, _ = server.NewVpnServer(
       server.WithVpnSubnet("ex) 192.168.0.100/24"),
       server.WithGrpcPort("ex) 443"),
       server.WithVpnJwtSalt("ex) jwt salt"),   
+      server.WithVpnJwtExpiration(24 * time.Hour),
       server.WithGrpcTlsCertification("ex) tls cert"),
       server.WithGrpcWithGrpcTlsPem("ex) tls pem"),
       server.WithGrpcUnaryInterceptors(authInterceptor),  // authentication      
@@ -242,6 +245,7 @@ vpn:
   subnet: "192.168.0.100/24" 
   log_path: "" 
   jwt_salt: "hello-world" 
+  jwt_expiration: "2h10m" 
   tls_certification: "blahblah" 
   tls_pem: "blahblah" 
 
@@ -267,7 +271,8 @@ vpn:
   port: "8080" 
   subnet: "192.168.0.100/24" 
   log_path: "" 
-  jwt_salt: "hello-world" 
+  jwt_salt: "hello-world"
+  jwt_expiration: "3h"
   tls_certification: "blahblah" 
   tls_pem: "blahblah"
 auth:    
