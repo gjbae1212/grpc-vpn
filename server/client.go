@@ -95,7 +95,7 @@ func (c *client) processReading() {
 // write packet
 func (c *client) processWriting() {
 	// make jwt checker
-	jwtChecker := time.NewTimer(5 * time.Minute)
+	jwtChecker := time.NewTicker(5 * time.Minute)
 
 	for c.loop.Load() {
 		select {
@@ -126,6 +126,8 @@ func (c *client) processWriting() {
 			}
 		}
 	}
+	// stop jwt checker
+	jwtChecker.Stop()
 	// flag off
 	c.loop.Store(false)
 }
