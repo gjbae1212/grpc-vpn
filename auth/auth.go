@@ -54,7 +54,7 @@ func (c *Config) ServerAuthForTest() (grpc.UnaryServerInterceptor, bool) {
 		if !ok {
 			return handler(ctx, req)
 		}
-		if auth.AuthType != protocol.AuthType_AT_GOOGLE_TEST {
+		if auth.AuthType != protocol.AuthType_AT_TEST {
 			return handler(ctx, req)
 		}
 		// inject user(vpn-test)
@@ -91,7 +91,7 @@ func (c *Config) ClientAuthForTest() (ClientAuthMethod, bool) {
 
 		// call default auth
 		result, err := conn.Auth(newctx, &protocol.AuthRequest{
-			AuthType: protocol.AuthType_AT_GOOGLE_TEST,
+			AuthType: protocol.AuthType_AT_TEST,
 		})
 		if err != nil {
 			return "", err

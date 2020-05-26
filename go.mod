@@ -24,6 +24,7 @@ require (
 	go.uber.org/atomic v1.4.0
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 	google.golang.org/grpc v1.28.1
+	google.golang.org/protobuf v1.21.0
 	gopkg.in/square/go-jose.v2 v2.5.0 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )

@@ -42,7 +42,7 @@ message AuthResponse {
 
 enum AuthType {
     AT_NONE = 0; // unknown
-    AT_GOOGLE_TEST = 1;  // test
+    AT_TEST = 1;  // test
     AT_GOOGLE_OPEN_ID = 2; // google open id
     AT_AWS_IAM = 3; // aws iam
 }
