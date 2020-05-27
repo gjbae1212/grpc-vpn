@@ -3,3 +3,5 @@ tmp.txt
 *.test
 cmd/vpn-server/vpn-server
 cmd/vpn-client/vpn-client
+test-client.yaml
+test-server.yaml

@@ -10,11 +10,11 @@ type Option interface {
 }
 
 type config struct {
-	serverAddr       string
-	serverPort       string
-	tlsCertification string
-	tlsInsecure      bool
-	authMethod       auth.ClientAuthMethod
+	serverAddr              string
+	serverPort              string
+	grpcInsecure            bool
+	selfSignedCertification string
+	authMethod              auth.ClientAuthMethod
 }
 
 // OptionFunc is a function for Option interface.
@@ -36,13 +36,6 @@ func WithServerPort(port string) OptionFunc {
 	}
 }
 
-// WithTlsCertification returns OptionFunc for inserting tls certification.
-func WithTlsCertification(cert string) OptionFunc {
-	return func(c *config) {
-		c.tlsCertification = cert
-	}
-}
-
 // WithAuthMethod returns OptionFunc for inserting auth method.
 func WithAuthMethod(f auth.ClientAuthMethod) OptionFunc {
 	return func(c *config) {
@@ -50,9 +43,16 @@ func WithAuthMethod(f auth.ClientAuthMethod) OptionFunc {
 	}
 }
 
-// WithTlsInsecure returns OptionFunc for inserting tls insecure.
-func WithTlsInsecure(b bool) OptionFunc {
+// WithGRPCInsecure returns OptionFunc for inserting grpc insecure.
+func WithGRPCInsecure(b bool) OptionFunc {
 	return func(c *config) {
-		c.tlsInsecure = b
+		c.grpcInsecure = b
+	}
+}
+
+// WithSelfSignedCertification returns OptionFunc for inserting grpc custom certification
+func WithSelfSignedCertification(cert string) OptionFunc {
+	return func(c *config) {
+		c.selfSignedCertification = cert
 	}
 }

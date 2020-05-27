@@ -65,9 +65,10 @@ func startRun() commandRun {
 		if defaultConfig.Port != "" {
 			opts = append(opts, client.WithServerPort(defaultConfig.Port))
 		}
-		if defaultConfig.TlsCertification != "" {
-			opts = append(opts, client.WithTlsCertification(defaultConfig.TlsCertification))
+		if defaultConfig.SelfSignedCertification != "" {
+			opts = append(opts, client.WithSelfSignedCertification(defaultConfig.SelfSignedCertification))
 		}
+		opts = append(opts, client.WithGRPCInsecure(defaultConfig.Insecure))
 
 		// aws authentication
 		method1, ok1 := defaultConfig.Auth.ClientAuthForAwsIAM()

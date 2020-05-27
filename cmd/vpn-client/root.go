@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gjbae1212/grpc-vpn/auth"
 	"github.com/gjbae1212/grpc-vpn/internal"
@@ -27,10 +28,11 @@ var (
 )
 
 type config struct {
-	Addr             string
-	Port             string
-	TlsCertification string
-	Auth             auth.Config
+	Addr                    string
+	Port                    string
+	SelfSignedCertification string
+	Insecure                bool
+	Auth                    auth.Config
 }
 
 type commandRun func(cmd *cobra.Command, args []string)
@@ -74,8 +76,11 @@ func setConfig(cfgPath string) error {
 					defaultConfig.Port = internal.InterfaceToString(v)
 				case "addr":
 					defaultConfig.Addr = internal.InterfaceToString(v)
-				case "tls_certification":
-					defaultConfig.TlsCertification = internal.InterfaceToString(v)
+				case "self_signed_certification":
+					defaultConfig.SelfSignedCertification = internal.InterfaceToString(v)
+				case "insecure":
+					insecure, _ := strconv.ParseBool(internal.InterfaceToString(v))
+					defaultConfig.Insecure = insecure
 				default:
 					return fmt.Errorf("[ERR] unknown config %s", k)
 				}

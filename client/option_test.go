@@ -50,27 +50,6 @@ func TestWithServerPort(t *testing.T) {
 	}
 }
 
-func TestWithTlsCertification(t *testing.T) {
-	assert := assert.New(t)
-
-	tests := map[string]struct {
-		input  string
-		output string
-	}{
-		"success": {
-			input:  "allan",
-			output: "allan",
-		},
-	}
-
-	for _, t := range tests {
-		c := &config{}
-		f := WithTlsCertification(t.input)
-		f(c)
-		assert.Equal(t.output, c.tlsCertification)
-	}
-}
-
 func TestWithAuthMethod(t *testing.T) {
 	assert := assert.New(t)
 
@@ -99,7 +78,28 @@ func TestWithAuthMethod(t *testing.T) {
 	}
 }
 
-func TestWithTlsInsecure(t *testing.T) {
+func TestWithSelfSignedCertification(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := map[string]struct {
+		input  string
+		output string
+	}{
+		"success": {
+			input:  "allan",
+			output: "allan",
+		},
+	}
+
+	for _, t := range tests {
+		c := &config{}
+		f := WithSelfSignedCertification(t.input)
+		f(c)
+		assert.Equal(t.output, c.selfSignedCertification)
+	}
+}
+
+func TestWithGRPCInsecure(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
@@ -114,8 +114,8 @@ func TestWithTlsInsecure(t *testing.T) {
 
 	for _, t := range tests {
 		c := &config{}
-		f := WithTlsInsecure(t.input)
+		f := WithGRPCInsecure(t.input)
 		f(c)
-		assert.Equal(t.output, c.tlsInsecure)
+		assert.Equal(t.output, c.grpcInsecure)
 	}
 }

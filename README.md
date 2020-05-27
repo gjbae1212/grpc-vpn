@@ -296,7 +296,8 @@ client config(config.yaml)
 vpn:
   addr: "" # Required(vpn server addr)
   port: "" # Required(vpn server port)
-  tls_certification: "" # Required(vpn server tls cert)
+  insecure: true or false # Required (true is to disable tls, false is to enable tls)
+  self_signed_certification: "" # Optional(If you are using self-signed certification, you must insert it.)
 auth: # Optional
   google_openid: # Optional(if your vpn-server support to google openid connect authentication)
     client_id: ""
@@ -310,14 +311,16 @@ auth: # Optional
 # 1. Example Non Authentication
 vpn:
   addr: "localhost" 
-  port: "8080" 
-  tls_certification: "blahblah" 
+  port: "8080"
+  insecure: false 
+  self_signed_certification: ""   
 
 # 2. Example Google OpenId Connect (Reference https://developers.google.com/identity/protocols/oauth2/native-app)
 vpn:
   addr: "localhost" 
-  port: "8080" 
-  tls_certification: "blahblah"
+  port: "8080"
+  insecure: false
+  self_signed_certification: ""   
 auth: 
   google_openid: 
     client_id: "gogole client id"
@@ -326,8 +329,9 @@ auth:
 # 3. Example Aws IAM
 vpn:
   addr: "localhost" 
-  port: "8080" 
-  tls_certification: "blahblah"
+  port: "8080"
+  insecure: false
+  self_signed_certification: ""  
 auth: 
   aws_iam:  # Optional(if your vpn-server support to aws iam authentication)
     access_key: "aws access key"

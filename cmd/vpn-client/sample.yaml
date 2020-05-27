@@ -1,7 +1,8 @@
 vpn:
   addr: ""
   port: ""
-  tls_certification: ""
+  insecure: false
+  self_signed_certification: ""
 auth:
   google_openid:
     client_id: ""

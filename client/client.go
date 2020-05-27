@@ -14,6 +14,8 @@ import (
 	"time"
 	"unsafe"
 
+	"google.golang.org/grpc/credentials"
+
 	"github.com/sirupsen/logrus"
 
 	"google.golang.org/grpc/keepalive"
@@ -27,7 +29,6 @@ import (
 	"github.com/gjbae1212/grpc-vpn/internal"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	health_pb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/cenkalti/backoff"
@@ -41,7 +42,7 @@ const (
 
 var (
 	defaultOptions = []Option{
-		WithTlsInsecure(true),
+		WithGRPCInsecure(false),
 	}
 )
 
@@ -287,7 +288,7 @@ func (vc *vpnClient) setGRPCConnection() error {
 	vc.connLock.Lock()
 	defer vc.connLock.Unlock()
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", vc.originServerIP.String(), vc.cfg.serverPort), vc.dialOpts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", vc.cfg.serverAddr, vc.cfg.serverPort), vc.dialOpts...)
 	if err != nil {
 		return errors.Wrapf(err, "Method: Run")
 	}
@@ -497,15 +498,20 @@ func NewVpnClient(opts ...Option) (VpnClient, error) {
 		}),
 	}
 
-	if cfg.tlsCertification != "" {
-		roots := x509.NewCertPool()
-		if ok := roots.AppendCertsFromPEM([]byte(cfg.tlsCertification)); !ok {
-			return nil, errors.Wrapf(internal.ErrorInvalidParams, "TLS Certification Invalid Method: NewVpnClient")
-		}
-		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
-			RootCAs: roots, InsecureSkipVerify: cfg.tlsInsecure})))
-	} else {
+	// apply to tls settings.
+	if cfg.grpcInsecure {
 		dialOpts = append(dialOpts, grpc.WithInsecure())
+	} else {
+		if cfg.selfSignedCertification != "" {
+			roots := x509.NewCertPool()
+			if ok := roots.AppendCertsFromPEM([]byte(cfg.selfSignedCertification)); !ok {
+				return nil, errors.Wrapf(internal.ErrorInvalidParams, "TLS Certification Invalid Method: NewVpnClient")
+			}
+			dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(
+				&tls.Config{RootCAs: roots, InsecureSkipVerify: false})))
+		} else {
+			dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{InsecureSkipVerify: false})))
+		}
 	}
 
 	return &vpnClient{
