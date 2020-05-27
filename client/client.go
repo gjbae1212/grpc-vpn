@@ -288,7 +288,7 @@ func (vc *vpnClient) setGRPCConnection() error {
 	vc.connLock.Lock()
 	defer vc.connLock.Unlock()
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", vc.cfg.serverAddr, vc.cfg.serverPort), vc.dialOpts...)
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", vc.originServerIP.String(), vc.cfg.serverPort), vc.dialOpts...)
 	if err != nil {
 		return errors.Wrapf(err, "Method: Run")
 	}
@@ -507,8 +507,13 @@ func NewVpnClient(opts ...Option) (VpnClient, error) {
 			if ok := roots.AppendCertsFromPEM([]byte(cfg.selfSignedCertification)); !ok {
 				return nil, errors.Wrapf(internal.ErrorInvalidParams, "TLS Certification Invalid Method: NewVpnClient")
 			}
+			insecureSkipVerify := false
+			// if input addr is a ip, changing InsecureSkipVerify value to true (vulnerability from MITM attack)
+			if cfg.serverAddr == originServerIP.String() {
+				insecureSkipVerify = true
+			}
 			dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(
-				&tls.Config{RootCAs: roots, InsecureSkipVerify: false})))
+				&tls.Config{RootCAs: roots, ServerName: cfg.serverAddr, InsecureSkipVerify: insecureSkipVerify})))
 		} else {
 			dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{InsecureSkipVerify: false})))
 		}
