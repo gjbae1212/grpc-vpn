@@ -33,17 +33,18 @@ type client struct {
 
 // read packet
 func (c *client) processReading() {
+ReadLoop:
 	for c.loop.Load() {
 		packet, err := c.stream.Recv()
 		if err == io.EOF {
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) EOF",
 				c.user, c.originIP.String(), c.vpnIP.String()))
-			break
+			break ReadLoop
 		}
 		if err != nil {
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
 				c.user, c.originIP.String(), c.vpnIP.String(), err.Error()))
-			break
+			break ReadLoop
 		}
 
 		// check error code
@@ -54,7 +55,7 @@ func (c *client) processReading() {
 			c.stream.Send(&protocol.IPPacket{ErrorCode: protocol.ErrorCode_EC_UNKNOWN})
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
 				c.user, c.originIP.String(), c.vpnIP.String(), internal.ErrorReceiveUnknownPacket.Error()))
-			break
+			break ReadLoop
 		}
 
 		// check packet type
@@ -63,7 +64,7 @@ func (c *client) processReading() {
 		default:
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
 				c.user, c.originIP.String(), c.vpnIP.String(), internal.ErrorReceiveUnknownPacket.Error()))
-			break
+			break ReadLoop
 		}
 
 		// check packet
@@ -71,7 +72,7 @@ func (c *client) processReading() {
 		if raw == nil {
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
 				c.user, c.originIP.String(), c.vpnIP.String(), internal.ErrorReceiveUnknownPacket.Error()))
-			break
+			break ReadLoop
 		}
 
 		// check source ip(equals vpn ip)
@@ -79,7 +80,7 @@ func (c *client) processReading() {
 		if !srcIP.Equal(c.vpnIP) {
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s(%s)",
 				c.user, c.originIP.String(), c.vpnIP.String(), internal.ErrorReceiveUnknownPacket.Error(), srcIP))
-			break
+			break ReadLoop
 		}
 
 		// out to server
@@ -97,18 +98,19 @@ func (c *client) processWriting() {
 	// make jwt checker
 	jwtChecker := time.NewTicker(5 * time.Minute)
 
+WriteLoop:
 	for c.loop.Load() {
 		select {
 		case packet := <-c.in:
 			if err := c.stream.Send(packet); err != nil {
 				defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
 					c.user, c.originIP.String(), c.vpnIP.String(), err.Error()))
-				break
+				break WriteLoop
 			}
 		case <-c.exit:
 			defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) exit signal",
 				c.user, c.originIP.String(), c.vpnIP.String()))
-			break
+			break WriteLoop
 		case <-jwtChecker.C:
 			// if JWT is expired, sending to error and break.
 			if c.jwt.Claims.Valid() != nil {
@@ -122,7 +124,7 @@ func (c *client) processWriting() {
 					defaultLogger.Error(color.RedString("[ERR] %s (%s, %s) %s",
 						c.user, c.originIP.String(), c.vpnIP.String(), err.Error()))
 				}
-				break
+				break WriteLoop
 			}
 		}
 	}
