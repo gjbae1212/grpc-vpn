@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gjbae1212/grpc-vpn/auth"
+
 	"google.golang.org/grpc"
 
 	"github.com/stretchr/testify/assert"
@@ -15,12 +17,10 @@ func TestWithVpnSubNet(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		input  string
-		output string
+		input string
 	}{
 		"success": {
-			input:  "allan",
-			output: "allan",
+			input: "allan",
 		},
 	}
 
@@ -28,7 +28,7 @@ func TestWithVpnSubNet(t *testing.T) {
 		c := &config{}
 		f := WithVpnSubNet(t.input)
 		f(c)
-		assert.Equal(t.output, c.vpnSubNet)
+		assert.Equal(t.input, c.vpnSubNet)
 	}
 }
 
@@ -36,12 +36,10 @@ func TestWithJwtSalt(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		input  string
-		output string
+		input string
 	}{
 		"success": {
-			input:  "allan",
-			output: "allan",
+			input: "allan",
 		},
 	}
 
@@ -49,7 +47,7 @@ func TestWithJwtSalt(t *testing.T) {
 		c := &config{}
 		f := WithVpnJwtSalt(t.input)
 		f(c)
-		assert.Equal(t.output, c.vpnJwtSalt)
+		assert.Equal(t.input, c.vpnJwtSalt)
 	}
 }
 
@@ -57,12 +55,10 @@ func TestWithVpnJwtExpiration(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		input  time.Duration
-		output time.Duration
+		input time.Duration
 	}{
 		"success": {
-			input:  time.Hour,
-			output: time.Hour,
+			input: time.Hour,
 		},
 	}
 
@@ -70,7 +66,7 @@ func TestWithVpnJwtExpiration(t *testing.T) {
 		c := &config{}
 		f := WithVpnJwtExpiration(t.input)
 		f(c)
-		assert.Equal(t.output, c.vpnJwtExpiration)
+		assert.Equal(t.input, c.vpnJwtExpiration)
 	}
 }
 
@@ -78,12 +74,10 @@ func TestWithGrpcPort(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		input  string
-		output string
+		input string
 	}{
 		"success": {
-			input:  "allan",
-			output: "allan",
+			input: "allan",
 		},
 	}
 
@@ -91,7 +85,7 @@ func TestWithGrpcPort(t *testing.T) {
 		c := &config{}
 		f := WithGrpcPort(t.input)
 		f(c)
-		assert.Equal(t.output, c.grpcPort)
+		assert.Equal(t.input, c.grpcPort)
 	}
 }
 
@@ -99,12 +93,10 @@ func TestWithGrpcTlsCertification(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		input  string
-		output string
+		input string
 	}{
 		"success": {
-			input:  "allan",
-			output: "allan",
+			input: "allan",
 		},
 	}
 
@@ -112,7 +104,7 @@ func TestWithGrpcTlsCertification(t *testing.T) {
 		c := &config{}
 		f := WithGrpcTlsCertification(t.input)
 		f(c)
-		assert.Equal(t.output, c.grpcTlsCertification)
+		assert.Equal(t.input, c.grpcTlsCertification)
 	}
 }
 
@@ -120,12 +112,10 @@ func TestWithGrpcTlsPem(t *testing.T) {
 	assert := assert.New(t)
 
 	tests := map[string]struct {
-		input  string
-		output string
+		input string
 	}{
 		"success": {
-			input:  "allan",
-			output: "allan",
+			input: "allan",
 		},
 	}
 
@@ -133,7 +123,7 @@ func TestWithGrpcTlsPem(t *testing.T) {
 		c := &config{}
 		f := WithGrpcTlsPem(t.input)
 		f(c)
-		assert.Equal(t.output, c.grpcTlsPem)
+		assert.Equal(t.input, c.grpcTlsPem)
 	}
 }
 
@@ -146,12 +136,10 @@ func TestWithGrpcUnaryInterceptors(t *testing.T) {
 	input := []grpc.UnaryServerInterceptor{f}
 
 	tests := map[string]struct {
-		input  []grpc.UnaryServerInterceptor
-		output []grpc.UnaryServerInterceptor
+		input []grpc.UnaryServerInterceptor
 	}{
 		"success": {
-			input:  input,
-			output: input,
+			input: input,
 		},
 	}
 
@@ -159,7 +147,7 @@ func TestWithGrpcUnaryInterceptors(t *testing.T) {
 		c := &config{}
 		f := WithGrpcUnaryInterceptors(t.input)
 		f(c)
-		assert.True(reflect.DeepEqual(t.input, t.output))
+		assert.True(reflect.DeepEqual(t.input, c.grpcUnaryInterceptors))
 	}
 }
 
@@ -172,12 +160,10 @@ func TestWithGrpcStreamInterceptors(t *testing.T) {
 	input := []grpc.StreamServerInterceptor{f}
 
 	tests := map[string]struct {
-		input  []grpc.StreamServerInterceptor
-		output []grpc.StreamServerInterceptor
+		input []grpc.StreamServerInterceptor
 	}{
 		"success": {
-			input:  input,
-			output: input,
+			input: input,
 		},
 	}
 
@@ -185,7 +171,7 @@ func TestWithGrpcStreamInterceptors(t *testing.T) {
 		c := &config{}
 		f := WithGrpcStreamInterceptors(t.input)
 		f(c)
-		assert.True(reflect.DeepEqual(t.input, t.output))
+		assert.True(reflect.DeepEqual(t.input, c.grpcStreamInterceptors))
 	}
 }
 
@@ -195,12 +181,10 @@ func TestWithGrpcOptions(t *testing.T) {
 	input := []grpc.ServerOption{grpc.WriteBufferSize(10)}
 
 	tests := map[string]struct {
-		input  []grpc.ServerOption
-		output []grpc.ServerOption
+		input []grpc.ServerOption
 	}{
 		"success": {
-			input:  input,
-			output: input,
+			input: input,
 		},
 	}
 
@@ -208,6 +192,30 @@ func TestWithGrpcOptions(t *testing.T) {
 		c := &config{}
 		f := WithGrpcOptions(t.input)
 		f(c)
-		assert.True(reflect.DeepEqual(t.input, t.output))
+		assert.True(reflect.DeepEqual(t.input, c.grpcOptions))
+	}
+}
+
+func TestWithAuthMethods(t *testing.T) {
+	assert := assert.New(t)
+
+	f := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		return nil, nil
+	}
+	input := []auth.ServerAuthMethod{f}
+
+	tests := map[string]struct {
+		input []auth.ServerAuthMethod
+	}{
+		"success": {
+			input: input,
+		},
+	}
+
+	for _, t := range tests {
+		c := &config{}
+		f := WithAuthMethods(t.input)
+		f(c)
+		assert.True(reflect.DeepEqual(t.input, c.grpcAuthMethods))
 	}
 }

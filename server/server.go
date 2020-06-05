@@ -86,9 +86,23 @@ func NewVpnServer(opts ...Option) (VpnServer, error) {
 		opt.apply(cfg)
 	}
 
+	// add authentication method to interceptors
+	unaryInterceptors := []grpc.UnaryServerInterceptor{}
+	for _, method := range cfg.grpcAuthMethods {
+		unaryInterceptors = append(unaryInterceptors, grpc.UnaryServerInterceptor(method))
+	}
+
+	// if auth methods isn't to exist, inserting auth method for test.
+	if len(unaryInterceptors) == 0 {
+		authManager, _ := auth.NewServerManagerForTest()
+		method, _ := authManager.ServerAuth()
+		unaryInterceptors = append(unaryInterceptors, grpc.UnaryServerInterceptor(method))
+	}
+	unaryInterceptors = append(unaryInterceptors, cfg.grpcUnaryInterceptors...)
+
 	// apply default grpc interceptors
 	cfg.grpcUnaryInterceptors = append([]grpc.UnaryServerInterceptor{defaultUnaryServerInterceptors()},
-		cfg.grpcUnaryInterceptors...)
+		unaryInterceptors...)
 	cfg.grpcStreamInterceptors = append([]grpc.StreamServerInterceptor{defaultStreamServerInterceptors()},
 		cfg.grpcStreamInterceptors...)
 
@@ -112,7 +126,7 @@ func NewVpnServer(opts ...Option) (VpnServer, error) {
 		cfg.grpcOptions = append([]grpc.ServerOption{grpc.Creds(cred)}, cfg.grpcOptions...)
 	}
 
-	// merge all of grpc option
+	// merge all of GRPC interceptors
 	allOpts := []grpc.ServerOption{
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(cfg.grpcStreamInterceptors...)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(cfg.grpcUnaryInterceptors...)),

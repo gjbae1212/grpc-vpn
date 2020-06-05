@@ -35,7 +35,8 @@ type config struct {
 	JwtExpiration    time.Duration
 	TlsCertification string
 	TlsPem           string
-	Auth             auth.Config
+	GoogleConfig     *auth.GoogleOpenIDConfig
+	AwsConfig        *auth.AwsIamConfig
 }
 
 type commandRun func(cmd *cobra.Command, args []string)
@@ -98,18 +99,18 @@ func setConfig(cfgPath string) error {
 			for k, v := range value.(map[interface{}]interface{}) {
 				switch k {
 				case "google_openid":
-					defaultConfig.Auth.GoogleOpenId = &auth.GoogleOpenIDConfig{}
+					defaultConfig.GoogleConfig = &auth.GoogleOpenIDConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "client_id":
-							defaultConfig.Auth.GoogleOpenId.ClientId = internal.InterfaceToString(vv)
+							defaultConfig.GoogleConfig.ClientId = internal.InterfaceToString(vv)
 						case "client_secret":
-							defaultConfig.Auth.GoogleOpenId.ClientSecret = internal.InterfaceToString(vv)
+							defaultConfig.GoogleConfig.ClientSecret = internal.InterfaceToString(vv)
 						case "hd":
-							defaultConfig.Auth.GoogleOpenId.HD = internal.InterfaceToString(vv)
+							defaultConfig.GoogleConfig.HD = internal.InterfaceToString(vv)
 						case "allow_emails":
 							for _, vvv := range vv.([]interface{}) {
-								defaultConfig.Auth.GoogleOpenId.AllowEmails = append(defaultConfig.Auth.GoogleOpenId.AllowEmails,
+								defaultConfig.GoogleConfig.AllowEmails = append(defaultConfig.GoogleConfig.AllowEmails,
 									vvv.(string))
 							}
 						default:
@@ -117,14 +118,14 @@ func setConfig(cfgPath string) error {
 						}
 					}
 				case "aws_iam":
-					defaultConfig.Auth.AwsIAM = &auth.AwsIamConfig{}
+					defaultConfig.AwsConfig = &auth.AwsIamConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "account_id":
-							defaultConfig.Auth.AwsIAM.ServerAccountId = internal.InterfaceToString(vv)
+							defaultConfig.AwsConfig.ServerAccountId = internal.InterfaceToString(vv)
 						case "allow_users":
 							for _, vvv := range vv.([]interface{}) {
-								defaultConfig.Auth.AwsIAM.ServerAllowUsers = append(defaultConfig.Auth.AwsIAM.ServerAllowUsers,
+								defaultConfig.AwsConfig.ServerAllowUsers = append(defaultConfig.AwsConfig.ServerAllowUsers,
 									vvv.(string))
 							}
 						default:

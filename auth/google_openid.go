@@ -36,6 +36,22 @@ type GoogleOpenIDConfig struct {
 	AllowEmails []string // allow emails (only vpn-server)
 }
 
+// ServerAuth returns ServerAuthMethod and bool value(whether exist or not).
+func (c *GoogleOpenIDConfig) ServerAuth() (ServerAuthMethod, bool) {
+	if c.ClientId == "" || c.ClientSecret == "" {
+		return nil, false
+	}
+	return ServerAuthMethod(c.unaryServerInterceptor()), true
+}
+
+// ClientAuth is returns  ClientAuthMethod for Google Open ID.
+func (c *GoogleOpenIDConfig) ClientAuth() (ClientAuthMethod, bool) {
+	if c.ClientId == "" || c.ClientSecret == "" {
+		return nil, false
+	}
+	return c.clientAuthMethod(), true
+}
+
 // unaryServerInterceptor returns new unary server interceptor that checks an authorization with google openID.
 func (c *GoogleOpenIDConfig) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
@@ -204,4 +220,34 @@ func (c *GoogleOpenIDConfig) clientAuthMethod() ClientAuthMethod {
 
 		return response.Jwt, nil
 	}
+}
+
+// NewServerManagerForGoogleOpenID returns ServerManager implementing googleOpenI
+func NewServerManagerForGoogleOpenID(clientId, clientSecret, hd string, allowEmails []string) (ServerManager, error) {
+	if clientId == "" || clientSecret == "" {
+		return nil, internal.ErrorInvalidParams
+	}
+
+	if allowEmails == nil {
+		allowEmails = []string{}
+	}
+
+	return &GoogleOpenIDConfig{
+		ClientId:     clientId,
+		ClientSecret: clientSecret,
+		HD:           hd,
+		AllowEmails:  allowEmails,
+	}, nil
+}
+
+// NewClientManagerForGoogleOpenID returns ClientManager implementing googleOpenId.
+func NewClientManagerForGoogleOpenID(clientId, clientSecret string) (ClientManager, error) {
+	if clientId == "" || clientSecret == "" {
+		return nil, internal.ErrorInvalidParams
+	}
+
+	return &GoogleOpenIDConfig{
+		ClientId:     clientId,
+		ClientSecret: clientSecret,
+	}, nil
 }

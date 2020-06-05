@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gjbae1212/grpc-vpn/auth"
 	"log"
 	"os"
 	"runtime"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 )
 
 var (
@@ -61,21 +61,14 @@ func startRun() commandRun {
 		}
 
 		// apply auth interceptors
-		var interceptors []grpc.UnaryServerInterceptor
-		if auth1, ok := defaultConfig.Auth.ServerAuthForGoogleOpenID(); ok {
-			interceptors = append(interceptors, auth1)
+		var authMethods []auth.ServerAuthMethod
+		if auth1, ok := defaultConfig.GoogleConfig.ServerAuth(); ok {
+			authMethods = append(authMethods, auth1)
 		}
-		if auth2, ok := defaultConfig.Auth.ServerAuthForAwsIAM(); ok {
-			interceptors = append(interceptors, auth2)
+		if auth2, ok := defaultConfig.AwsConfig.ServerAuth(); ok {
+			authMethods = append(authMethods, auth2)
 		}
-
-		// if interceptors for auth isn't exist, it is test mode(bypass authentication).
-		if len(interceptors) == 0 {
-			testAuth, _ := defaultConfig.Auth.ServerAuthForTest()
-			interceptors = append(interceptors, testAuth)
-		}
-
-		opts = append(opts, server.WithGrpcUnaryInterceptors(interceptors))
+		opts = append(opts, server.WithAuthMethods(authMethods))
 
 		// create server
 		server, err := server.NewVpnServer(opts...)

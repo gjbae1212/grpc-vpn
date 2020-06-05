@@ -71,21 +71,15 @@ func startRun() commandRun {
 		opts = append(opts, client.WithGRPCInsecure(defaultConfig.Insecure))
 
 		// aws authentication
-		method1, ok1 := defaultConfig.Auth.ClientAuthForAwsIAM()
+		method1, ok1 := defaultConfig.AwsConfig.ClientAuth()
 		if ok1 {
 			opts = append(opts, client.WithAuthMethod(method1))
 		}
 
 		// google authentication
-		method2, ok2 := defaultConfig.Auth.ClientAuthForGoogleOpenID()
+		method2, ok2 := defaultConfig.GoogleConfig.ClientAuth()
 		if ok2 {
 			opts = append(opts, client.WithAuthMethod(method2))
-		}
-
-		// if both method1 and method2 is empty.
-		if !ok1 && !ok2 {
-			method3, _ := defaultConfig.Auth.ClientAuthForTest()
-			opts = append(opts, client.WithAuthMethod(method3))
 		}
 
 		client, err := client.NewVpnClient(opts...)

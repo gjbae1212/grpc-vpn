@@ -26,6 +26,22 @@ type AwsIamConfig struct {
 	ServerAccountId  string   // server allow users
 }
 
+// ServerAuth returns ServerAuthMethod and bool value(whether exist or not).
+func (c *AwsIamConfig) ServerAuth() (ServerAuthMethod, bool) {
+	if c.ServerAccountId == "" {
+		return nil, false
+	}
+	return ServerAuthMethod(c.unaryServerInterceptor()), true
+}
+
+// ClientAuth is returns ClientAuthMethod for AWS IAM.
+func (c *AwsIamConfig) ClientAuth() (ClientAuthMethod, bool) {
+	if c.ClientAccessKey == "" || c.ClientSecretAccessKey == "" {
+		return nil, false
+	}
+	return c.clientAuthMethod(), true
+}
+
 // unaryServerInterceptor returns new unary server interceptor that checks an authorization with aws iam.
 func (c *AwsIamConfig) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
@@ -103,4 +119,32 @@ func (c *AwsIamConfig) clientAuthMethod() ClientAuthMethod {
 
 		return response.Jwt, nil
 	}
+}
+
+// NewServerManagerForAwsIAM returns ServerManager implementing awsIam.
+func NewServerManagerForAwsIAM(accountId string, allowUsers []string) (ServerManager, error) {
+	if accountId == "" {
+		return nil, internal.ErrorInvalidParams
+	}
+
+	if allowUsers == nil {
+		allowUsers = []string{}
+	}
+
+	return &AwsIamConfig{
+		ServerAccountId:  accountId,
+		ServerAllowUsers: allowUsers,
+	}, nil
+}
+
+// NewClientManagerForAwsIAM returns ClientManager implementing awsIam.
+func NewClientManagerForAwsIAM(accessKey, accessSecret string) (ClientManager, error) {
+	if accessKey == "" || accessSecret == "" {
+		return nil, internal.ErrorInvalidParams
+	}
+
+	return &AwsIamConfig{
+		ClientAccessKey:       accessKey,
+		ClientSecretAccessKey: accessSecret,
+	}, nil
 }

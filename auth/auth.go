@@ -22,33 +22,21 @@ const (
 	Bearer              = "bearer"
 )
 
-// Config is a config for authorization in server.
-type Config struct {
-	GoogleOpenId *GoogleOpenIDConfig
-	AwsIAM       *AwsIamConfig
-}
-
 type ClientAuthMethod func(conn protocol.VPNClient) (jwt string, err error)
+type ServerAuthMethod grpc.UnaryServerInterceptor
 
-// ServerAuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
-func (c *Config) ServerAuthForGoogleOpenID() (grpc.UnaryServerInterceptor, bool) {
-	if c.GoogleOpenId == nil || c.GoogleOpenId.ClientId == "" ||
-		c.GoogleOpenId.ClientSecret == "" {
-		return nil, false
-	}
-	return c.GoogleOpenId.unaryServerInterceptor(), true
+type ServerManager interface {
+	ServerAuth() (ServerAuthMethod, bool)
 }
 
-// ServerAuthForGoogleOpenID returns interceptor and bool value(whether exist or not).
-func (c *Config) ServerAuthForAwsIAM() (grpc.UnaryServerInterceptor, bool) {
-	if c.AwsIAM == nil || c.AwsIAM.ServerAccountId == "" {
-		return nil, false
-	}
-	return c.AwsIAM.unaryServerInterceptor(), true
+type ClientManager interface {
+	ClientAuth() (ClientAuthMethod, bool)
 }
 
-// ServerAuthForTest returns interceptor and bool value(whether exist or not).
-func (c *Config) ServerAuthForTest() (grpc.UnaryServerInterceptor, bool) {
+type defaultConfig struct{}
+
+// AuthMethod returns ServerAuth and bool value(whether exist or not).
+func (c *defaultConfig) ServerAuth() (ServerAuthMethod, bool) {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		auth, ok := req.(*protocol.AuthRequest)
 		if !ok {
@@ -63,25 +51,8 @@ func (c *Config) ServerAuthForTest() (grpc.UnaryServerInterceptor, bool) {
 	}, true
 }
 
-// ClientAuthForGoogleOpenID is returns Auth Method for Google Open ID.
-func (c *Config) ClientAuthForGoogleOpenID() (ClientAuthMethod, bool) {
-	if c.GoogleOpenId == nil || c.GoogleOpenId.ClientId == "" ||
-		c.GoogleOpenId.ClientSecret == "" {
-		return nil, false
-	}
-	return c.GoogleOpenId.clientAuthMethod(), true
-}
-
-// ClientAuthForAwsIAM is returns Auth Method for AWS IAM.
-func (c *Config) ClientAuthForAwsIAM() (ClientAuthMethod, bool) {
-	if c.AwsIAM == nil || c.AwsIAM.ClientAccessKey == "" || c.AwsIAM.ClientSecretAccessKey == "" {
-		return nil, false
-	}
-	return c.AwsIAM.clientAuthMethod(), true
-}
-
-// ClientAuthForTest is returns Auth Method for Test.
-func (c *Config) ClientAuthForTest() (ClientAuthMethod, bool) {
+// AuthMethod is returns ClientAuth for Test.
+func (c *defaultConfig) ClientAuth() (ClientAuthMethod, bool) {
 	return func(conn protocol.VPNClient) (jwt string, err error) {
 		// Timeout 30 seconds
 		ctx := context.Background()
@@ -105,6 +76,16 @@ func (c *Config) ClientAuthForTest() (ClientAuthMethod, bool) {
 			return "", internal.ErrorUnauthorized
 		}
 	}, true
+}
+
+// NewServerManagerForTest returns ServerManager implementing googleOpenI
+func NewServerManagerForTest() (ServerManager, error) {
+	return &defaultConfig{}, nil
+}
+
+// NewClientManagerForTest returns ClientManager implementing googleOpenId.
+func NewClientManagerForTest() (ClientManager, error) {
+	return &defaultConfig{}, nil
 }
 
 // JWTAuthHeaderForGRPC returns JWT Auth Header for GRPC.

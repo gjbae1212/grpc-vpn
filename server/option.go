@@ -3,6 +3,8 @@ package server
 import (
 	"time"
 
+	"github.com/gjbae1212/grpc-vpn/auth"
+
 	"google.golang.org/grpc"
 )
 
@@ -21,6 +23,7 @@ type config struct {
 	grpcUnaryInterceptors  []grpc.UnaryServerInterceptor
 	grpcStreamInterceptors []grpc.StreamServerInterceptor
 	grpcOptions            []grpc.ServerOption
+	grpcAuthMethods        []auth.ServerAuthMethod
 }
 
 // OptionFunc is a function for Option interface.
@@ -67,6 +70,13 @@ func WithGrpcTlsCertification(cert string) OptionFunc {
 func WithGrpcTlsPem(pem string) OptionFunc {
 	return func(c *config) {
 		c.grpcTlsPem = pem
+	}
+}
+
+// WithAuthMethods returns OptionFunc for inserting GRPC authentication method.
+func WithAuthMethods(methods []auth.ServerAuthMethod) OptionFunc {
+	return func(c *config) {
+		c.grpcAuthMethods = methods
 	}
 }
 

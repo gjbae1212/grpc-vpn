@@ -478,6 +478,11 @@ func NewVpnClient(opts ...Option) (VpnClient, error) {
 	tmpOpts := make([]Option, len(defaultOptions))
 	copy(tmpOpts, defaultOptions)
 
+	// default auth method(test)
+	authManager, _ := auth.NewClientManagerForTest()
+	authMethod, _ := authManager.ClientAuth()
+	tmpOpts = append(tmpOpts, WithAuthMethod(authMethod))
+
 	// merge custom options
 	tmpOpts = append(tmpOpts, opts...)
 

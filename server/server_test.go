@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/gjbae1212/grpc-vpn/auth"
 	"github.com/sirupsen/logrus"
 	"testing"
 	"time"
@@ -37,6 +38,10 @@ func (m *mockVPN) Auth(ctx context.Context, req *protocol.AuthRequest) (*protoco
 func TestNewVpnServer(t *testing.T) {
 	assert := assert.New(t)
 
+	authManger, err := auth.NewServerManagerForTest()
+	assert.NoError(err)
+	authMethod, _ := authManger.ServerAuth()
+
 	tests := map[string]struct {
 		opts  []Option
 		check *config
@@ -53,6 +58,9 @@ func TestNewVpnServer(t *testing.T) {
 						Time:    5 * time.Minute,  // keepalive 5 min
 						Timeout: 20 * time.Second, // keepalive timeout
 					})},
+				grpcUnaryInterceptors: []grpc.UnaryServerInterceptor{
+					grpc.UnaryServerInterceptor(authMethod),
+				},
 			},
 		},
 		"additional": {
@@ -69,6 +77,7 @@ func TestNewVpnServer(t *testing.T) {
 						grpc_ctxtags.UnaryServerInterceptor(),
 						grpc_recovery.UnaryServerInterceptor()},
 				),
+				WithAuthMethods([]auth.ServerAuthMethod{authMethod}),
 			},
 			check: &config{
 				vpnSubNet: "10.0.0.1/24",
@@ -78,6 +87,7 @@ func TestNewVpnServer(t *testing.T) {
 					grpc_recovery.StreamServerInterceptor(),
 				},
 				grpcUnaryInterceptors: []grpc.UnaryServerInterceptor{
+					grpc.UnaryServerInterceptor(authMethod),
 					grpc_ctxtags.UnaryServerInterceptor(),
 					grpc_recovery.UnaryServerInterceptor(),
 				},

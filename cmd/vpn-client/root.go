@@ -32,7 +32,8 @@ type config struct {
 	Port                    string
 	SelfSignedCertification string
 	Insecure                bool
-	Auth                    auth.Config
+	GoogleConfig            *auth.GoogleOpenIDConfig
+	AwsConfig               *auth.AwsIamConfig
 }
 
 type commandRun func(cmd *cobra.Command, args []string)
@@ -89,25 +90,25 @@ func setConfig(cfgPath string) error {
 			for k, v := range value.(map[interface{}]interface{}) {
 				switch k {
 				case "google_openid":
-					defaultConfig.Auth.GoogleOpenId = &auth.GoogleOpenIDConfig{}
+					defaultConfig.GoogleConfig = &auth.GoogleOpenIDConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "client_id":
-							defaultConfig.Auth.GoogleOpenId.ClientId = internal.InterfaceToString(vv)
+							defaultConfig.GoogleConfig.ClientId = internal.InterfaceToString(vv)
 						case "client_secret":
-							defaultConfig.Auth.GoogleOpenId.ClientSecret = internal.InterfaceToString(vv)
+							defaultConfig.GoogleConfig.ClientSecret = internal.InterfaceToString(vv)
 						default:
 							return fmt.Errorf("[ERR] unknown config %s", kk)
 						}
 					}
 				case "aws_iam":
-					defaultConfig.Auth.AwsIAM = &auth.AwsIamConfig{}
+					defaultConfig.AwsConfig = &auth.AwsIamConfig{}
 					for kk, vv := range v.(map[interface{}]interface{}) {
 						switch kk.(string) {
 						case "access_key":
-							defaultConfig.Auth.AwsIAM.ClientAccessKey = internal.InterfaceToString(vv)
+							defaultConfig.AwsConfig.ClientAccessKey = internal.InterfaceToString(vv)
 						case "secret_access_key":
-							defaultConfig.Auth.AwsIAM.ClientSecretAccessKey = internal.InterfaceToString(vv)
+							defaultConfig.AwsConfig.ClientSecretAccessKey = internal.InterfaceToString(vv)
 						default:
 							return fmt.Errorf("[ERR] unknown config %s", kk)
 						}
