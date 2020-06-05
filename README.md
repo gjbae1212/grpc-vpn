@@ -9,7 +9,7 @@
 
 **GRPC-VPN** is the **VPN** server and client which supports authentications such as Google OpenId Connect or AWS IAM, using GRPC.  
   
-Other authentications(LDAP, ...) will be to apply it, if you will implement custom [GRPC interceptor](https://github.com/gjbae1212/grpc-vpn/tree/master/auth) for VPN server and [ClientAuthMethod](https://github.com/gjbae1212/grpc-vpn/tree/master/auth) for VPN client.
+Other authentications(LDAP, ...) will be to apply it, if you will implement custom [ServerAuthMethod](https://github.com/gjbae1212/grpc-vpn/tree/master/auth) for VPN server and [ClientAuthMethod](https://github.com/gjbae1212/grpc-vpn/tree/master/auth) for VPN client.
 
 <br/>
 
