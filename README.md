@@ -58,42 +58,37 @@ Using GRPC can implement the unification authentication flow, also using JWT and
 
 **1. Non Authentication**
 ```go
+# -------------------------------------------------
 # SERVER
+# -------------------------------------------------
 
 import (
-    "github.com/gjbae1212/grpc-vpn/server"
-    "github.com/gjbae1212/grpc-vpn/auth"
+    "github.com/gjbae1212/grpc-vpn/server"    
 )
 
-cfg := auth.Config{}
-authInterceptor, _ := cfg.ServerAuthForTest()
-
 s, _ = server.NewVpnServer(
-      server.WithVpnSubnet("ex) 192.168.0.100/24"),
-      server.WithGrpcPort("ex) 443"),
-      server.WithVpnJwtSalt("ex) jwt salt"),  
-      server.WithVpnJwtExpiration(24 * time.Hour),
-      server.WithGrpcTlsCertification("ex) tls cert"),
-      server.WithGrpcWithGrpcTlsPem("ex) tls pem"),
-      server.WithGrpcUnaryInterceptors(authInterceptor),  // authentication      
+            server.WithVpnSubNet("ex) 192.168.0.100/24"),
+      		server.WithGrpcPort("ex) 443"),
+      		server.WithVpnJwtSalt("ex) jwt salt"),
+      		server.WithVpnJwtExpiration(24*time.Hour),
+      		server.WithGrpcTlsCertification("ex) tls cert"),
+      		server.WithGrpcTlsPem("ex) tls pem"),       
 )
 s.Run()
 
-# CLIENT
+# ------------------------------------------------- 
+# CLIENT 
+# -------------------------------------------------
 
 import (
     "github.com/gjbae1212/grpc-vpn/client"
-    "github.com/gjbae1212/grpc-vpn/auth"
+        "github.com/gjbae1212/grpc-vpn/auth"
 )
 
-cfg := auth.Config{}
-authMethod, _ := cfg.ClientAuthForTest()
-
 c, _ := client.NewVpnClient(
-     client.WithServerAddr("ex) server addr"),
-     client.WithServerPort("ex) server port"),
-     client.WithTlsCertification("ex) server tls cert"),
-     client.WithAuthMethod(autMethod),
+            client.WithServerAddr("ex) server addr"),
+     		client.WithServerPort("ex) server port"),
+     		client.WithSelfSignedCertification("ex) server tls cert"),     
 )
 c.Run()
 ```
@@ -101,101 +96,108 @@ c.Run()
 
 **2. Authentication [Google OpenID Connect](https://developers.google.com/identity/protocols/oauth2/native-app)**
 ```go
+# -------------------------------------------------
 # SERVER
+# -------------------------------------------------
 
 import (
     "github.com/gjbae1212/grpc-vpn/server"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
-cfg := auth.Config{}
-cfg.GoogleOpenId = &auth.GoogleOpenIDConfig{
-     ClientId: "ex) google openid connect client_id",
-     ClientSecret: "ex) google openid connect client_secret",
-     HD: "ex) if your GSUITE is using, it's domain name to allow",
-     AllowEmails: []string{"ex) allow email"},
-}
-authInterceptor, _ := cfg.ServerAuthForGoogleOpenID()
+authGoogle, _ := auth.NewServerManagerForGoogleOpenID(
+		"ex) google openid connect client_id",
+		"ex) google openid connect client_secret",
+		"ex) if your GSUITE is using, it's domain name to allow",
+		[]string{"gjbae1212@gmail.com", "blahblah"},
+	)
+authMethod, _ := authGoogle.ServerAuth()
 
-s, _ = server.NewVpnServer(
-      server.WithVpnSubnet("ex) 192.168.0.100/24"),
-      server.WithGrpcPort("ex) 443"),
-      server.WithVpnJwtSalt("ex) jwt salt"),   
-      server.WithVpnJwtExpiration(24 * time.Hour),
-      server.WithGrpcTlsCertification("ex) tls cert"),
-      server.WithGrpcWithGrpcTlsPem("ex) tls pem"),
-      server.WithGrpcUnaryInterceptors(authInterceptor),  // authentication      
+s, _ := server.NewVpnServer(
+    server.WithVpnSubNet("ex) 192.168.0.100/24"),
+    server.WithGrpcPort("ex) 443"),
+    server.WithVpnJwtSalt("ex) jwt salt"),
+    server.WithVpnJwtExpiration(24*time.Hour),
+    server.WithGrpcTlsCertification("ex) tls cert"),
+    server.WithGrpcTlsPem("ex) tls pem"),
+    server.WithAuthMethods([]auth.ServerAuthMethod{authMethod}), // authentication
 )
 s.Run()
 
-# CLIENT
+# ------------------------------------------------- 
+# CLIENT 
+# -------------------------------------------------
 
 import (
     "github.com/gjbae1212/grpc-vpn/client"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
-cfg := auth.Config{}
-cfg.GoogleOpenId = &auth.GoogleOpenIDConfig{
-     ClientId: "ex) google openid connect client_id",
-     ClientSecret: "ex) google openid connect client_secret",
-}
-authMethod, _ := cfg.ClientAuthForGoogleOpenID()
-
+authGoogle, _ := auth.NewClientManagerForGoogleOpenID(
+		"ex) google openid connect client_id",
+		"ex) google openid connect client_secret",
+	)
+	
+authMethod, _ := authGoogle.ClientAuth()
 c, _ := client.NewVpnClient(
-     client.WithServerAddr("ex) server addr"),
-     client.WithServerPort("ex) server port"),
-     client.WithTlsCertification("ex) server tls cert"),
-     client.WithAuthMethod(autMethod),
+    client.WithServerAddr("ex) server addr"),
+    client.WithServerPort("ex) server port"),
+    client.WithSelfSignedCertification("ex) server tls cert"),
+    client.WithAuthMethod(authMethod), // authentication
 )
 c.Run()
+
 ```
 <br/>
 
 **3. Authentication(AWS IAM)**
 ```go
+# -------------------------------------------------
+# SERVER
+# -------------------------------------------------
+
 import (
     "github.com/gjbae1212/grpc-vpn/server"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
-cfg := auth.Config{}
-cfg.AwsIAM = &auth.AwsIamConfig{           
-     ServerAllowUsers: []string{"ex) allow user"},
-     ServerAccountId: "ex) allow aws account id",
-}
-authInterceptor, _ := cfg.ServerAuthForAwsIAM()
+authAws, _ := auth.NewServerManagerForAwsIAM(
+		"ex) allow aws account id",
+		[]string{"gjbae1212@gmail.com", "blahblah"},
+	)
+authMethod, _ := authAws.ServerAuth()
 
-s, _ = server.NewVpnServer(
-      server.WithVpnSubnet("ex) 192.168.0.100/24"),
-      server.WithGrpcPort("ex) 443"),
-      server.WithVpnJwtSalt("ex) jwt salt"),   
-      server.WithVpnJwtExpiration(24 * time.Hour),
-      server.WithGrpcTlsCertification("ex) tls cert"),
-      server.WithGrpcWithGrpcTlsPem("ex) tls pem"),
-      server.WithGrpcUnaryInterceptors(authInterceptor),  // authentication      
+s, _ := server.NewVpnServer(
+    server.WithVpnSubNet("ex) 192.168.0.100/24"),
+    server.WithGrpcPort("ex) 443"),
+    server.WithVpnJwtSalt("ex) jwt salt"),
+    server.WithVpnJwtExpiration(24*time.Hour),
+    server.WithGrpcTlsCertification("ex) tls cert"),
+    server.WithGrpcTlsPem("ex) tls pem"),
+    server.WithAuthMethods([]auth.ServerAuthMethod{authMethod}), // authentication
 )
 s.Run()
 
-# CLIENT
+# ------------------------------------------------- 
+# CLIENT 
+# -------------------------------------------------
 
 import (
     "github.com/gjbae1212/grpc-vpn/client"
     "github.com/gjbae1212/grpc-vpn/auth"
 )
 
-cfg := auth.Config{}
-cfg.AwsIAM = &auth.AwsIamConfig{
-     ClientAccessKey: "ex) aws key"
-     ClientSecretAccessKey: "ex)  aws secret access key"     
-}
-authMethod, _ := cfg.ClientAuthForAwsIAM()
+authAws, _ := auth.NewClientManagerForAwsIAM(
+		"ex) aws key",
+		"ex) aws secret access key",
+	)
+authMethod, _ := authAws.ClientAuth()
 
 c, _ := client.NewVpnClient(
-     client.WithServerAddr("ex) server addr"),
-     client.WithServerPort("ex) server port"),
-     client.WithTlsCertification("ex) server tls cert"),
-     client.WithAuthMethod(autMethod),
+    client.WithServerAddr("ex) server addr"),
+    client.WithServerPort("ex) server port"),
+    client.WithSelfSignedCertification("ex) server tls cert"),
+    client.WithAuthMethod(authMethod), // authentication
 )
 c.Run()
 ```
