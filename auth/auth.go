@@ -78,12 +78,12 @@ func (c *defaultConfig) ClientAuth() (ClientAuthMethod, bool) {
 	}, true
 }
 
-// NewServerManagerForTest returns ServerManager implementing googleOpenI
+// NewServerManagerForTest returns ServerManager for test.
 func NewServerManagerForTest() (ServerManager, error) {
 	return &defaultConfig{}, nil
 }
 
-// NewClientManagerForTest returns ClientManager implementing googleOpenId.
+// NewClientManagerForTest returns ClientManager for test
 func NewClientManagerForTest() (ClientManager, error) {
 	return &defaultConfig{}, nil
 }
